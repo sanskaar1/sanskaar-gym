@@ -128,14 +128,14 @@ details.w summary::-webkit-details-marker{display:none}
 .delta{font-size:12px;font-weight:600}
 .delta.up{color:var(--gold)}.delta.down{color:var(--acc)}
 /* nav */
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,16,20,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs{position:fixed;left:0;right:0;bottom:calc(-1 * var(--gap,0px));z-index:30;background:rgba(14,16,20,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav.tabs::after{content:'';position:absolute;left:0;right:0;top:100%;height:120px;background:rgb(14,16,20)}
 nav.tabs .in-nav{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 9px;font-size:11px;font-weight:600;color:var(--muted)}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button.on{color:var(--acc)}
 /* rest timer */
-.restbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom));z-index:29;width:min(608px,calc(100% - 32px));background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;align-items:center;gap:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.restbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom) - var(--gap,0px));z-index:29;width:min(608px,calc(100% - 32px));background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;align-items:center;gap:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .restbar.hidden{display:none}
 .rb-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(255,214,10,.13);transition:width 1s linear}
 .restbar>*:not(.rb-fill){position:relative}
@@ -144,7 +144,7 @@ nav.tabs button.on{color:var(--acc)}
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
 .scrim.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:50%;bottom:0;z-index:41;width:min(640px,100%);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.sheet{position:fixed;left:50%;bottom:calc(-1 * var(--gap,0px));z-index:41;width:min(640px,100%);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
 .sheet.open{transform:translate(-50%,0)}
 .sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .sheet label.f{margin-top:12px}
@@ -645,7 +645,7 @@ function viewSettings() {
       ${srow('reset', 'Reset this device', 'Start fresh on this phone only', IC.chev, 'reset', true)}
     </div>
   </details>
-  <div class="foot">Sanskaar GYM</div>`;
+  <div class="foot">Sanskaar GYM · version 3</div>`;
 }
 
 /* ---------- charts ---------- */
@@ -922,9 +922,29 @@ function fixViewport() {
   b.style.display = 'none'; void b.offsetHeight; b.style.display = '';
   window.scrollTo(0, y);
 }
-window.addEventListener('resize', () => { fullH = Math.max(fullH, window.innerHeight); });
-document.addEventListener('focusout', () => setTimeout(fixViewport, 150));
-window.visualViewport && visualViewport.addEventListener('resize', () => setTimeout(fixViewport, 150));
+// Some iOS versions place fixed bottom bars a status-bar's height above the real screen bottom
+// in home-screen apps. Measure where "bottom: 0" lands and move the bars down by the difference.
+const probe = document.createElement('div');
+probe.style.cssText = 'position:fixed;left:0;bottom:0;width:1px;height:1px;visibility:hidden;pointer-events:none';
+document.body.appendChild(probe);
+function fitBottom() {
+  let gap = 0;
+  const standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  if (standalone && !document.activeElement?.matches('input,textarea,select')) {
+    const portrait = innerHeight > innerWidth, sw = screen.width, sh = screen.height;
+    const full = portrait ? Math.max(sw, sh) : Math.min(sw, sh);
+    gap = Math.round(full - probe.getBoundingClientRect().bottom);
+    if (gap < 2 || gap > 90) gap = 0; // anything bigger is the keyboard, not the bug
+  }
+  document.documentElement.style.setProperty('--gap', gap + 'px');
+}
+const refit = () => { fixViewport(); fitBottom(); };
+window.addEventListener('resize', () => { fullH = Math.max(fullH, window.innerHeight); setTimeout(fitBottom, 50); });
+window.addEventListener('orientationchange', () => setTimeout(fitBottom, 300));
+document.addEventListener('focusout', () => setTimeout(refit, 150));
+document.addEventListener('visibilitychange', () => setTimeout(fitBottom, 100));
+window.visualViewport && visualViewport.addEventListener('resize', () => setTimeout(refit, 150));
+fitBottom(); setTimeout(fitBottom, 500);
 
 render();
 if (S.active) keepAwake(true);
