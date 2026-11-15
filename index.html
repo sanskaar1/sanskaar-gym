@@ -795,7 +795,11 @@ $('#importFile').addEventListener('change', async ev => {
   catch (e) { toast('That file is not a Sanskaar GYM backup'); }
   ev.target.value = '';
 });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.active) keepAwake(true); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (S.active) keepAwake(true);
+  if (connected()) pullCloud(false).catch(() => {}); // pick up changes made on another device while this one was in the background
+});
 
 render();
 if (S.active) keepAwake(true);
