@@ -20,8 +20,9 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.4}
 body{padding-bottom:calc(150px + var(--sab,env(safe-area-inset-bottom)))}
-/* iOS home-screen apps only paint as far down as the page reaches, so every page reaches the real screen bottom */
-html{min-height:calc(100% + var(--gap,0px))}
+/* iOS home-screen apps shrink the view (and stop painting) when a page is shorter than the screen, so every page is at least screen-tall.
+   This uses the fixed screen height, never a measurement, so it can't loop. */
+html{min-height:var(--fullh,100%)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
 h1,h2,h3{margin:0;letter-spacing:-.02em}
@@ -651,7 +652,7 @@ function viewSettings() {
       ${srow('reset', 'Reset this device', 'Start fresh on this phone only', IC.chev, 'reset', true)}
     </div>
   </details>
-  <div class="foot">Sanskaar GYM · version 5<span id="diag">${diag}</span></div>`;
+  <div class="foot">Sanskaar GYM · version 6<span id="diag">${diag}</span></div>`;
 }
 
 /* ---------- charts ---------- */
@@ -946,7 +947,9 @@ function fitBottom() {
     gap = Math.round(full - pb); if (gap < 2 || gap > 90) gap = 0; // anything bigger is the keyboard
     if (sb > 44 && st > 0) sab = Math.max(0, sb - st);           // a real bottom inset is at most 34
   }
-  root.setProperty('--gap', gap + 'px'); root.setProperty('--sab', sab + 'px');
+  const set = (k, v) => { if (root.getPropertyValue(k) !== v) root.setProperty(k, v); };
+  set('--fullh', standalone ? full + 'px' : '100%');
+  set('--gap', gap + 'px'); set('--sab', sab + 'px');
   diag = `${standalone ? 'app' : 'web'} · screen ${full} · view ${innerHeight} · bottom ${pb} · insets ${st}/${sb} · fix ${gap}/${sab}`;
   const el = document.getElementById('diag'); if (el) el.textContent = diag;
 }
