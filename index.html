@@ -19,7 +19,7 @@
 :root{--bg:#0b0d10;--card:#14171c;--card2:#1c2027;--line:#262b33;--text:#eef0f3;--muted:#8b929c;--acc:#ffd60a;--accInk:#0b0d10;--red:#ff6161;--gold:#ff9f43;--r:18px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.4}
-body{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+body{padding-bottom:calc(150px + var(--sab,env(safe-area-inset-bottom)))}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
 h1,h2,h3{margin:0;letter-spacing:-.02em}
@@ -49,8 +49,11 @@ h3{font-size:19px}
 .in,select.in,textarea.in{width:100%;height:44px;padding:0 14px;border-radius:12px;background:var(--card2);border:1px solid var(--line);outline:none}
 textarea.in{height:auto;padding:12px 14px;resize:vertical}
 .in:focus{border-color:var(--acc)}
-input[type=date].in{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;text-align:left;line-height:44px}
-input[type=date].in::-webkit-date-and-time-value{text-align:left;margin:0}
+.datef{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;overflow:hidden}
+.datef svg{width:18px;height:18px;color:var(--muted);flex-shrink:0}
+.datef input{position:absolute;inset:0;width:100%;height:100%;min-width:0;opacity:0;border:0;margin:0;padding:0;-webkit-appearance:none;appearance:none}
+.datef:focus-within{border-color:var(--acc)}
+#diag{display:block;margin-top:4px;font-size:10.5px;color:#454b54;font-variant-numeric:tabular-nums}
 label.f{display:block;font-size:12.5px;color:var(--muted);font-weight:500}
 label.f .in{margin-top:6px;color:var(--text);font-size:15px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -128,14 +131,14 @@ details.w summary::-webkit-details-marker{display:none}
 .delta{font-size:12px;font-weight:600}
 .delta.up{color:var(--gold)}.delta.down{color:var(--acc)}
 /* nav */
-nav.tabs{position:fixed;left:0;right:0;bottom:calc(-1 * var(--gap,0px));z-index:30;background:rgba(14,16,20,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs{position:fixed;left:0;right:0;bottom:calc(-1 * var(--gap,0px));z-index:30;background:rgba(14,16,20,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:var(--sab,env(safe-area-inset-bottom))}
 nav.tabs::after{content:'';position:absolute;left:0;right:0;top:100%;height:120px;background:rgb(14,16,20)}
 nav.tabs .in-nav{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 9px;font-size:11px;font-weight:600;color:var(--muted)}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button.on{color:var(--acc)}
 /* rest timer */
-.restbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom) - var(--gap,0px));z-index:29;width:min(608px,calc(100% - 32px));background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;align-items:center;gap:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.restbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + var(--sab,env(safe-area-inset-bottom)) - var(--gap,0px));z-index:29;width:min(608px,calc(100% - 32px));background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;align-items:center;gap:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .restbar.hidden{display:none}
 .rb-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(255,214,10,.13);transition:width 1s linear}
 .restbar>*:not(.rb-fill){position:relative}
@@ -144,7 +147,7 @@ nav.tabs button.on{color:var(--acc)}
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
 .scrim.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:50%;bottom:calc(-1 * var(--gap,0px));z-index:41;width:min(640px,100%);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.sheet{position:fixed;left:50%;bottom:calc(-1 * var(--gap,0px));z-index:41;width:min(640px,100%);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 16px calc(24px + var(--sab,env(safe-area-inset-bottom)));transform:translate(-50%,105%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
 .sheet.open{transform:translate(-50%,0)}
 .sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .sheet label.f{margin-top:12px}
@@ -257,6 +260,7 @@ const IC = {
   table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 4v16"/></svg>',
   unlink:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7H7a5 5 0 0 0 0 10h2M15 7h2a5 5 0 0 1 4 8M8 12h3M3 3l18 18"/></svg>',
   reset:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>',
 };
 const MUSCLES = ['Chest','Back','Legs','Glutes','Shoulders','Arms','Core','Cardio','Other'];
@@ -584,7 +588,7 @@ function viewBody() {
   return `
   <h2 style="margin-top:6px">Log body stats</h2>
   <div class="card">
-    <label class="f">Date<input class="in" type="date" id="b_date" value="${ymd(Date.now())}"></label>
+    <label class="f">Date<div class="in datef"><span id="b_date_txt">${nice(Date.now())}</span>${IC.cal}<input type="date" id="b_date" value="${ymd(Date.now())}" aria-label="Date"></div></label>
     <div class="grid2" style="margin-top:10px">${F.map(([k, l, u]) => `<label class="f">${l} (${u})<input class="in" inputmode="decimal" id="b_${k}" placeholder="${latest && latest[k] !== '' ? latest[k] : ''}"></label>`).join('')}</div>
     <label class="f" style="margin-top:10px">Notes<input class="in" id="b_notes" placeholder="Sleep, diet, how you feel…"></label>
     <button class="btn acc block" data-a="body-save">Save entry</button>
@@ -645,7 +649,7 @@ function viewSettings() {
       ${srow('reset', 'Reset this device', 'Start fresh on this phone only', IC.chev, 'reset', true)}
     </div>
   </details>
-  <div class="foot">Sanskaar GYM · version 3</div>`;
+  <div class="foot">Sanskaar GYM · version 4<span id="diag">${diag}</span></div>`;
 }
 
 /* ---------- charts ---------- */
@@ -899,6 +903,7 @@ document.addEventListener('change', ev => {
   if (d.vid) { const ex = S.library.find(e => e.id === d.vid); if (ex) { ex.video = t.value.trim(); save(); render(); if (t.value && !ytId(t.value)) toast("That doesn't look like a YouTube link"); } }
   else if (d.set) { S.settings[d.set] = t.type === 'checkbox' ? t.checked : t.value.trim(); save(); render(); }
   else if ('progEx' in d) { progEx = t.value; render(); }
+  else if (t.id === 'b_date') { const x = $('#b_date_txt'); if (x) x.textContent = t.value ? nice(t.value + 'T12:00') : nice(Date.now()); }
 });
 $('#importFile').addEventListener('change', async ev => {
   const f = ev.target.files[0]; if (!f) return;
@@ -922,21 +927,26 @@ function fixViewport() {
   b.style.display = 'none'; void b.offsetHeight; b.style.display = '';
   window.scrollTo(0, y);
 }
-// Some iOS versions place fixed bottom bars a status-bar's height above the real screen bottom
-// in home-screen apps. Measure where "bottom: 0" lands and move the bars down by the difference.
-const probe = document.createElement('div');
-probe.style.cssText = 'position:fixed;left:0;bottom:0;width:1px;height:1px;visibility:hidden;pointer-events:none';
-document.body.appendChild(probe);
+// iOS home-screen apps have two bugs that leave a gap under the tab bar: "bottom: 0" landing a
+// status-bar's height above the real screen bottom, or the bottom safe-area inset coming back with
+// the status bar added on. Measure both and correct them.
+const mk = css => { const d = document.createElement('div'); d.style.cssText = 'position:fixed;left:0;width:1px;visibility:hidden;pointer-events:none;' + css; document.body.appendChild(d); return d; };
+const probe = mk('bottom:0;height:1px'), insets = mk('top:0;height:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)');
+let diag = '';
 function fitBottom() {
-  let gap = 0;
+  const root = document.documentElement.style, cs = getComputedStyle(insets);
+  const st = parseFloat(cs.paddingTop) || 0, sb = parseFloat(cs.paddingBottom) || 0;
   const standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  const portrait = innerHeight > innerWidth, sw = screen.width, sh = screen.height;
+  const full = portrait ? Math.max(sw, sh) : Math.min(sw, sh), pb = Math.round(probe.getBoundingClientRect().bottom);
+  let gap = 0, sab = sb;
   if (standalone && !document.activeElement?.matches('input,textarea,select')) {
-    const portrait = innerHeight > innerWidth, sw = screen.width, sh = screen.height;
-    const full = portrait ? Math.max(sw, sh) : Math.min(sw, sh);
-    gap = Math.round(full - probe.getBoundingClientRect().bottom);
-    if (gap < 2 || gap > 90) gap = 0; // anything bigger is the keyboard, not the bug
+    gap = Math.round(full - pb); if (gap < 2 || gap > 90) gap = 0; // anything bigger is the keyboard
+    if (sb > 44 && st > 0) sab = Math.max(0, sb - st);           // a real bottom inset is at most 34
   }
-  document.documentElement.style.setProperty('--gap', gap + 'px');
+  root.setProperty('--gap', gap + 'px'); root.setProperty('--sab', sab + 'px');
+  diag = `${standalone ? 'app' : 'web'} · screen ${full} · view ${innerHeight} · bottom ${pb} · insets ${st}/${sb} · fix ${gap}/${sab}`;
+  const el = document.getElementById('diag'); if (el) el.textContent = diag;
 }
 const refit = () => { fixViewport(); fitBottom(); };
 window.addEventListener('resize', () => { fullH = Math.max(fullH, window.innerHeight); setTimeout(fitBottom, 50); });
