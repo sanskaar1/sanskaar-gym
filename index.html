@@ -127,7 +127,7 @@ details.w summary::-webkit-details-marker{display:none}
 .delta.up{color:var(--gold)}.delta.down{color:var(--acc)}
 /* nav */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,16,20,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-nav.tabs .in-nav{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs .in-nav{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 9px;font-size:11px;font-weight:600;color:var(--muted)}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button.on{color:var(--acc)}
@@ -151,11 +151,54 @@ nav.tabs button.on{color:var(--acc)}
 .steps{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:13.5px}
 .steps li{margin:6px 0}
 code{background:var(--card2);padding:2px 6px;border-radius:6px;font-size:12.5px}
+.top-r{display:flex;align-items:center;gap:8px}
+.gear{width:34px;height:34px;border-radius:99px;display:grid;place-items:center;color:var(--muted);background:var(--card);border:1px solid var(--line)}
+.gear svg{width:18px;height:18px}
+/* settings: grouped rows */
+.page-h{display:flex;align-items:center;gap:12px;margin:4px 0 2px}
+.page-h h3{font-size:24px;font-weight:800}
+.gh{font-size:12px;font-weight:600;color:var(--muted);margin:22px 6px 8px;text-transform:uppercase;letter-spacing:.08em}
+.group{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.srow{display:flex;align-items:center;gap:12px;min-height:58px;padding:10px 14px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.srow:last-child{border-bottom:0}
+.srow .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,214,10,.12);color:var(--acc);flex-shrink:0}
+.srow .ic.n{background:var(--card2);color:var(--muted)}
+.srow .ic svg{width:18px;height:18px}
+.srow .grow{flex:1;min-width:0}
+.srow .t{font-weight:600}
+.srow .s{font-size:12px;color:var(--muted);margin-top:2px}
+.srow .chev{color:#59606a;width:16px;height:16px;flex-shrink:0}
+.seg{display:inline-flex;background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:3px}
+.seg button{height:30px;min-width:44px;padding:0 10px;border-radius:8px;font-weight:700;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--acc);color:var(--accInk)}
+.stepper{display:inline-flex;align-items:center;gap:4px}
+.stepper button{width:32px;height:32px;border-radius:9px;background:var(--card2);border:1px solid var(--line);font-weight:700;font-size:17px}
+.stepper span{min-width:46px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.mini-in{width:72px;height:36px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--line);outline:none;font-weight:700}
+.mini-in:focus{border-color:var(--acc)}
+details.adv{margin-top:22px}
+details.adv summary{list-style:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:0 6px 8px;display:flex;align-items:center;gap:6px}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary svg{width:14px;height:14px;transition:transform .2s}
+details.adv[open] summary svg{transform:rotate(90deg)}
+.foot{text-align:center;color:#59606a;font-size:12px;margin-top:26px}
+/* session comparison */
+.cmp-head{margin-top:14px;padding:14px;border-radius:14px;background:radial-gradient(120% 160% at 0% 0%,rgba(255,214,10,.2),transparent 60%),var(--card2);border:1px solid rgba(255,214,10,.3)}
+.cmp-head.flat{background:var(--card2);border-color:var(--line)}
+.cmp-head .big{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.tile .d{font-size:11.5px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.better{color:var(--acc)}.lower{color:var(--muted)}
+.cmp-ex{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.cmp-ex:last-child{border-bottom:0}
+.cmp-ex .n{font-weight:600;font-size:14px}
+.cmp-ex .x{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.cmp-ex .r{text-align:right;font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cmp-ex .r small{display:block;font-size:11.5px;font-weight:600}
 @media (max-width:380px){.set-row{grid-template-columns:28px 1fr 62px 54px 40px;gap:6px}.tiles{gap:6px}.tile .v{font-size:19px}}
 </style>
 </head>
 <body>
-<div class="top"><div class="wrap"><div class="brand">Sanskaar <b>GYM</b></div><button class="sync-pill" data-a="go-settings" id="syncPill"></button></div></div>
+<div class="top"><div class="wrap"><div class="brand">Sanskaar <b>GYM</b></div><div class="top-r"><button class="sync-pill" data-a="go-settings" id="syncPill"></button><button class="gear" data-a="go-settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div></div></div>
 <main class="wrap" id="view"></main>
 
 <div class="restbar hidden" id="restbar">
@@ -201,6 +244,16 @@ const IC = {
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  scale:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l2 13H4z"/><circle cx="12" cy="5" r="2"/><path d="M12 11v3"/></svg>',
+  timer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>',
+  ruler:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 6h4M9 10h3M8 14h4M9 18h3"/><circle cx="17" cy="6" r="2"/></svg>',
+  cloud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5z"/></svg>',
+  dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  ul:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>',
+  table:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 4v16"/></svg>',
+  unlink:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7H7a5 5 0 0 0 0 10h2M15 7h2a5 5 0 0 1 4 8M8 12h3M3 3l18 18"/></svg>',
+  reset:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>',
 };
 const MUSCLES = ['Chest','Back','Legs','Glutes','Shoulders','Arms','Core','Cardio','Other'];
@@ -282,8 +335,54 @@ function bestE1(exId, skipId) {
 }
 const wVolume = w => w.exercises.reduce((a, e) => a + e.sets.reduce((b, s) => b + s.w * s.r, 0), 0);
 
+/* ---------- this session vs last time ---------- */
+const exVol = e => e.sets.reduce((a, s) => a + s.w * s.r, 0);
+const exReps = e => e.sets.reduce((a, s) => a + s.r, 0);
+const wSets = w => w.exercises.reduce((a, e) => a + e.sets.length, 0);
+const wReps = w => w.exercises.reduce((a, e) => a + exReps(e), 0);
+const before = w => sorted().filter(x => x.id !== w.id && x.start < w.start);
+// The last time this same plan was done (or a workout with the same name, for ones started empty)
+const lastSession = w => before(w).find(x => w.planId ? x.planId === w.planId : x.name.trim().toLowerCase() === w.name.trim().toLowerCase());
+// Each exercise is compared with the last time you did that exercise, whichever day it was on
+const lastEx = (exId, w) => { for (const x of before(w)) { const e = x.exercises.find(e => e.exId === exId); if (e) return e; } return null; };
+const signed = (d, dp) => (d > 0 ? '+' : d < 0 ? '−' : '') + Math.abs(dp ? r1(d) : Math.round(d)).toLocaleString();
+function dTxt(now, was, u, sep = ' · ') {
+  if (!was) return '';
+  const d = now - was, p = d / was * 100;
+  if (Math.abs(p) < 0.05) return `<span class="lower">same as last time</span>`;
+  return `<span class="${d > 0 ? 'better' : 'lower'}">${d > 0 ? '▲' : '▼'} ${signed(d)}${u ? ' ' + u : ''}${sep}${signed(p, 1)}%</span>`;
+}
+function compareHTML(w) {
+  const prev = lastSession(w);
+  const rows = w.exercises.map(e => {
+    const p = lastEx(e.exId, w); if (!p) return { e, p };
+    const reps = !exVol(e) && !exVol(p); // bodyweight work: compare reps instead of volume
+    return { e, p, now: reps ? exReps(e) : exVol(e), was: reps ? exReps(p) : exVol(p), u: reps ? 'reps' : unit() };
+  });
+  let head = !prev && !rows.some(r => r.p) ? `<div class="cmp-head flat"><div class="big">First time 🎯</div><div class="muted sm" style="margin-top:4px">This session is the baseline. Next time you'll see exactly how much you beat it.</div></div>` : '';
+  if (prev) {
+    const v = wVolume(w), pv = wVolume(prev), pct = pv ? (v - pv) / pv * 100 : 0;
+    const up = pct >= 0.05, down = pct <= -0.05;
+    head = `<div class="cmp-head ${up ? '' : 'flat'}">
+      <div class="muted xs">vs last ${esc(prev.name)} · ${nice(prev.start)}</div>
+      <div class="big" style="margin-top:4px">${up ? `🔥 ${signed(v - pv)} ${unit()} more · ${signed(pct, 1)}%` : down ? `${Math.abs(r1(pct))}% under last time` : 'Matched last time'}</div>
+      <div class="muted sm" style="margin-top:2px">${up ? 'Total weight moved went up. Keep stacking it.' : down ? 'Lighter day — fine as long as the trend goes up.' : 'Same total weight moved. Add a rep next time.'}</div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="v">${Math.round(v).toLocaleString()}</div><div class="l">${unit()} volume</div><div class="d">${dTxt(v, pv, '', '<br>')}</div></div>
+      <div class="tile"><div class="v">${wSets(w)}</div><div class="l">Sets</div><div class="d">${dTxt(wSets(w), wSets(prev), '', '<br>')}</div></div>
+      <div class="tile"><div class="v">${wReps(w)}</div><div class="l">Reps</div><div class="d">${dTxt(wReps(w), wReps(prev), '', '<br>')}</div></div>
+    </div>`;
+  }
+  const list = rows.map(({ e, p, now, was, u }) => `<div class="cmp-ex"><div style="min-width:0"><div class="n ellip">${esc(e.name)}</div>
+      <div class="x ellip">${p ? `${p.sets.map(s => `${s.w}×${s.r}`).join(', ')} → <b style="color:var(--text)">${e.sets.map(s => `${s.w}×${s.r}`).join(', ')}</b>` : e.sets.map(s => `${s.w}×${s.r}`).join(', ')}</div></div>
+      <div class="r">${p ? `${signed(now - was)} ${u}<small>${was ? `<span class="${now > was ? 'better' : 'lower'}">${signed((now - was) / was * 100, 1)}%</span>` : ''}</small>` : '<span class="better">New</span>'}</div></div>`).join('');
+  return head + `<h2 style="margin:18px 2px 4px">Exercise by exercise</h2><div>${list}</div>`;
+}
+
 /* ---------- rendering ---------- */
-const TABS = [['workout','Workout'],['plans','Plans'],['progress','Progress'],['body','Body'],['settings','Settings']];
+const TABS = [['workout','Workout'],['plans','Plans'],['progress','Progress'],['body','Body']]; // Settings opens from the gear at the top
+let backTab = 'workout';
 function render() {
   $('#nav').innerHTML = TABS.map(([k, l]) => `<button class="${tab === k ? 'on' : ''}" data-a="tab" data-t="${k}">${IC[k]}${l}</button>`).join('');
   const pending = S.workouts.filter(w => !w.synced).length + S.body.filter(b => !b.synced).length + S.deleted.length;
@@ -464,7 +563,7 @@ function viewProgress() {
   <h2>History</h2>
   <div class="card" style="padding:2px 14px">${ws.map(w => `
     <details class="w"><summary><div><div class="t" style="font-weight:600">${esc(w.name)}</div><div class="muted xs">${nice(w.start)} · ${Math.round((w.end - w.start) / 6e4)} min · ${fmtN(wVolume(w))} ${unit()}</div></div><span class="muted xs">${w.synced ? '✓ sheet' : ''}</span></summary>
-      <div class="wd">${w.exercises.map(e => `<div class="e"><b>${esc(e.name)}</b><span>${e.sets.map(s => `${s.w}×${s.r}`).join(', ')}</span></div>`).join('')}
+      <div class="wd">${compareHTML(w)}
       ${w.notes ? `<p class="muted">${esc(w.notes)}</p>` : ''}
       <button class="btn sm danger" style="margin-top:8px" data-a="w-del" data-id="${w.id}">Delete workout</button></div>
     </details>`).join('')}</div>`;
@@ -506,37 +605,44 @@ function viewBody() {
       <button class="icon" data-a="b-del" data-id="${b.id}">${IC.x}</button></div>`).join('')}</div>` : ''}`;
 }
 
-/* ---- Settings tab ---- */
+/* ---- Settings (opens from the gear; not a main tab) ---- */
+const ago = t => { const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : short(t); };
+const srow = (ic, t, sub, right, a, neutral) => `<${a ? `button data-a="${a}"` : 'div'} class="srow"><span class="ic ${neutral ? 'n' : ''}">${IC[ic]}</span><div class="grow"><div class="t">${t}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>${right}</${a ? 'button' : 'div'}>`;
 function viewSettings() {
-  const st = S.settings;
-  const pending = S.workouts.filter(w => !w.synced).length + S.body.filter(b => !b.synced).length;
+  const st = S.settings, rs = +st.rest || 90;
+  const pending = S.workouts.filter(w => !w.synced).length + S.body.filter(b => !b.synced).length + S.deleted.length;
+  const status = pending ? `${pending} waiting to sync` : st.lastSync ? `Up to date · ${ago(st.lastSync)}` : 'Up to date';
   return `
-  <h2 style="margin-top:6px">Preferences</h2>
-  <div class="card">
-    <div class="grid3">
-      <label class="f">Units<select class="in" data-set="unit"><option value="kg" ${st.unit === 'kg' ? 'selected' : ''}>kg / cm</option><option value="lb" ${st.unit === 'lb' ? 'selected' : ''}>lb / in</option></select></label>
-      <label class="f">Rest (sec)<input class="in" inputmode="numeric" data-set="rest" value="${st.rest}"></label>
-      <label class="f">Height (${lenUnit()})<input class="in" inputmode="decimal" data-set="height" value="${esc(st.height)}"></label>
+  <div class="page-h"><button class="icon" data-a="back" aria-label="Back">${IC.back}</button><h3>Settings</h3></div>
+
+  <div class="gh">Training</div>
+  <div class="group">
+    ${srow('scale', 'Units', 'Weight &amp; size', `<div class="seg"><button class="${st.unit === 'kg' ? 'on' : ''}" data-a="unit" data-v="kg">kg</button><button class="${st.unit === 'lb' ? 'on' : ''}" data-a="unit" data-v="lb">lb</button></div>`)}
+    ${srow('timer', 'Rest timer', 'After each set', `<div class="stepper"><button data-a="rest-step" data-d="-15" aria-label="Less rest">−</button><span>${fmtDur(rs * 1000)}</span><button data-a="rest-step" data-d="15" aria-label="More rest">+</button></div>`)}
+    ${srow('ruler', 'Height', 'For BMI', `<input class="mini-in" inputmode="decimal" data-set="height" value="${esc(st.height)}" placeholder="—"><span class="muted sm">${lenUnit()}</span>`)}
+  </div>
+
+  <div class="gh">Google Sheet</div>
+  <div class="group">
+    ${connected() ? srow('cloud', 'Sync', status, `<button class="btn sm acc" data-a="sync">Sync now</button>`)
+    : `<div class="srow" style="flex-wrap:wrap"><span class="ic">${IC.cloud}</span><div class="grow"><div class="t">Connect your Sheet</div><div class="s">Enter your private key once on this device</div></div>
+       <div class="row gap" style="width:100%"><input class="in" id="apikey" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="xxxx-xxxx-xxxx-xxxx"><button class="btn acc" data-a="connect">Connect</button></div></div>`}
+  </div>
+
+  <div class="gh">Your data</div>
+  <div class="group">
+    ${srow('table', 'Download workouts', 'CSV for Excel or Sheets', IC.chev, 'export-csv')}
+    ${srow('dl', 'Save a backup', 'Everything, in one file', IC.chev, 'export-json')}
+    ${srow('ul', 'Restore a backup', 'From a saved backup file', IC.chev, 'import-json')}
+  </div>
+
+  <details class="adv"><summary>${IC.chev}More options</summary>
+    <div class="group">
+      ${connected() ? srow('unlink', 'Disconnect this device', 'Your Sheet keeps everything', IC.chev, 'disconnect', true) : ''}
+      ${srow('reset', 'Reset this device', 'Start fresh on this phone only', IC.chev, 'reset', true)}
     </div>
-  </div>
-  <h2>Google Sheets sync</h2>
-  ${connected() ? `<div class="card">
-    <div class="row gap"><span class="dot ok"></span><b>Connected to your Google Sheet</b></div>
-    <p class="sm muted" style="margin:8px 0 12px">Finished workouts go to the <b>Workouts</b> tab (one row per set), body stats to <b>Body</b>, and a full backup of everything is kept in a hidden tab, so your data is the same on every device.</p>
-    <div class="row gap"><button class="btn sm acc" data-a="sync">Sync now${pending ? ` (${pending})` : ''}</button><button class="btn sm ghost" data-a="disconnect">Disconnect this device</button></div>
-    <div class="xs muted" style="margin-top:10px">${st.lastSync ? 'Last synced ' + new Date(st.lastSync).toLocaleString() : 'Nothing synced yet'}</div>
-  </div>` : `<div class="card">
-    <p class="sm muted" style="margin:0 0 10px">Enter your private key to connect this device to your Google Sheet. Until then, everything is saved on this device only.</p>
-    <label class="f">Private key<input class="in" id="apikey" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="xxxx-xxxx-xxxx-xxxx"></label>
-    <button class="btn acc block" data-a="connect">Connect</button>
-  </div>`}
-  <h2>Backup</h2>
-  <div class="card row gap wrap-row">
-    <button class="btn sm" data-a="export-json">Export backup</button>
-    <button class="btn sm" data-a="import-json">Import backup</button>
-    <button class="btn sm" data-a="export-csv">Export CSV</button>
-  </div>
-  <button class="btn danger block" data-a="reset">Erase all data on this device</button>`;
+  </details>
+  <div class="foot">Sanskaar GYM</div>`;
 }
 
 /* ---------- charts ---------- */
@@ -637,11 +743,9 @@ function finishWorkout() {
   const w = { id: A.id, name: A.name || 'Workout', planId: A.planId, start: A.start, end: Date.now(), exercises, notes: '', synced: false };
   const prs = exercises.map(e => { const before = bestE1(e.exId, w.id), now = Math.max(...e.sets.map(s => e1rm(s.w, s.r))); return before && now > before ? { name: e.name, v: r1(now) } : null; }).filter(Boolean);
   S.workouts.push(w); S.active = null; stopRest(); keepAwake(false); save(); render();
-  const sets = exercises.reduce((a, e) => a + e.sets.length, 0);
-  openSheet(`<div style="text-align:center;padding:6px 0 4px"><div style="font-size:44px">💪</div><h3 style="font-size:24px;margin-top:4px">Workout complete</h3><div class="muted sm" style="margin-top:4px">${esc(w.name)} · ${nice(w.start)}</div></div>
-    <div class="tiles"><div class="tile"><div class="v">${Math.round((w.end - w.start) / 6e4)}<span class="sm muted">m</span></div><div class="l">Duration</div></div>
-      <div class="tile"><div class="v">${sets}</div><div class="l">Sets</div></div><div class="tile"><div class="v">${fmtN(wVolume(w))}</div><div class="l">${unit()} volume</div></div></div>
-    ${prs.map(p => `<div class="pr">${IC.trophy}<span>New PR · ${esc(p.name)} — est. 1RM ${p.v} ${unit()}</span></div>`).join('')}
+  openSheet(`<div style="text-align:center;padding:6px 0 4px"><div style="font-size:44px">💪</div><h3 style="font-size:24px;margin-top:4px">Workout complete</h3><div class="muted sm" style="margin-top:4px">${esc(w.name)} · ${nice(w.start)} · ${Math.round((w.end - w.start) / 6e4)} min</div></div>
+    ${compareHTML(w)}
+    ${prs.length ? `<h2 style="margin:18px 2px 4px">New records</h2>` : ''}${prs.map(p => `<div class="pr">${IC.trophy}<span>${esc(p.name)} — est. 1RM ${p.v} ${unit()}</span></div>`).join('')}
     <label class="f" style="margin-top:14px">How did it feel?<textarea class="in" id="wnotes" rows="2" placeholder="Energy, pain, what to change next time…"></textarea></label>
     <button class="btn acc block" data-a="notes-save" data-id="${w.id}">Done</button>`);
   if (S.settings.autoSync && connected()) sync(false);
@@ -695,7 +799,10 @@ document.addEventListener('click', ev => {
   const a = b.dataset.a, i = +b.dataset.i, j = +b.dataset.j, id = b.dataset.id, A = S.active;
   switch (a) {
     case 'tab': tab = b.dataset.t; editPlanId = null; render(); scrollTo(0, 0); break;
-    case 'go-settings': tab = 'settings'; render(); break;
+    case 'go-settings': if (tab !== 'settings') backTab = tab; tab = 'settings'; render(); scrollTo(0, 0); break;
+    case 'back': tab = backTab; render(); scrollTo(0, 0); break;
+    case 'unit': S.settings.unit = b.dataset.v; save(); render(); break;
+    case 'rest-step': S.settings.rest = Math.min(600, Math.max(15, (+S.settings.rest || 90) + +b.dataset.d)); save(); render(); break;
     case 'close': closeSheet(); break;
     case 'ask-ok': { const f = askFn; askFn = null; closeSheet(); f && f(); break; }
     case 'start': startWorkout(id); break;
@@ -772,7 +879,8 @@ document.addEventListener('click', ev => {
     case 'export-json': download(`sanskaar-gym-backup-${ymd(Date.now())}.json`, JSON.stringify(S, null, 2), 'application/json'); break;
     case 'import-json': $('#importFile').click(); break;
     case 'export-csv': download(`sanskaar-gym-workouts-${ymd(Date.now())}.csv`, csv([['Workout ID','Date','Start','Workout','Duration (min)','Exercise','Muscle','Set','Weight','Unit','Reps','Volume','Est. 1RM'], ...sorted().reverse().flatMap(workoutRows)]), 'text/csv'); break;
-    case 'reset': ask('Erase ALL workouts, plans and body stats? The Workouts and Body tabs in your Sheet are kept.', 'Erase everything', () => { S = seed(); save(); render(); }); break;
+    case 'reset': ask(connected() ? 'Reset this device? Your plans, workouts and body stats on this phone are cleared, and the Sheet will be overwritten with the empty copy. Save a backup first if you are not sure.'
+      : 'Reset this device? Your plans, workouts and body stats on this phone are cleared. Save a backup first if you are not sure.', 'Reset', () => { S = seed(); save(); tab = 'workout'; render(); }); break;
   }
 });
 document.addEventListener('input', ev => {
