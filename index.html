@@ -20,6 +20,8 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;line-height:1.4}
 body{padding-bottom:calc(150px + var(--sab,env(safe-area-inset-bottom)))}
+/* iOS home-screen apps only paint as far down as the page reaches, so every page reaches the real screen bottom */
+html{min-height:calc(100% + var(--gap,0px))}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
 h1,h2,h3{margin:0;letter-spacing:-.02em}
@@ -649,7 +651,7 @@ function viewSettings() {
       ${srow('reset', 'Reset this device', 'Start fresh on this phone only', IC.chev, 'reset', true)}
     </div>
   </details>
-  <div class="foot">Sanskaar GYM · version 4<span id="diag">${diag}</span></div>`;
+  <div class="foot">Sanskaar GYM · version 5<span id="diag">${diag}</span></div>`;
 }
 
 /* ---------- charts ---------- */
