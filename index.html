@@ -56,7 +56,6 @@ textarea.in{height:auto;padding:12px 14px;resize:vertical}
 .datef svg{width:18px;height:18px;color:var(--muted);flex-shrink:0}
 .datef input{position:absolute;inset:0;width:100%;height:100%;min-width:0;opacity:0;border:0;margin:0;padding:0;-webkit-appearance:none;appearance:none}
 .datef:focus-within{border-color:var(--acc)}
-#diag{display:block;margin-top:4px;font-size:10.5px;color:#454b54;font-variant-numeric:tabular-nums}
 label.f{display:block;font-size:12.5px;color:var(--muted);font-weight:500}
 label.f .in{margin-top:6px;color:var(--text);font-size:15px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -652,7 +651,7 @@ function viewSettings() {
       ${srow('reset', 'Reset this device', 'Start fresh on this phone only', IC.chev, 'reset', true)}
     </div>
   </details>
-  <div class="foot">Sanskaar GYM · version 6<span id="diag">${diag}</span></div>`;
+  <div class="foot">Sanskaar GYM · version 7</div>`;
 }
 
 /* ---------- charts ---------- */
@@ -935,7 +934,6 @@ function fixViewport() {
 // the status bar added on. Measure both and correct them.
 const mk = css => { const d = document.createElement('div'); d.style.cssText = 'position:fixed;left:0;width:1px;visibility:hidden;pointer-events:none;' + css; document.body.appendChild(d); return d; };
 const probe = mk('bottom:0;height:1px'), insets = mk('top:0;height:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)');
-let diag = '';
 function fitBottom() {
   const root = document.documentElement.style, cs = getComputedStyle(insets);
   const st = parseFloat(cs.paddingTop) || 0, sb = parseFloat(cs.paddingBottom) || 0;
@@ -950,8 +948,6 @@ function fitBottom() {
   const set = (k, v) => { if (root.getPropertyValue(k) !== v) root.setProperty(k, v); };
   set('--fullh', standalone ? full + 'px' : '100%');
   set('--gap', gap + 'px'); set('--sab', sab + 'px');
-  diag = `${standalone ? 'app' : 'web'} · screen ${full} · view ${innerHeight} · bottom ${pb} · insets ${st}/${sb} · fix ${gap}/${sab}`;
-  const el = document.getElementById('diag'); if (el) el.textContent = diag;
 }
 const refit = () => { fixViewport(); fitBottom(); };
 window.addEventListener('resize', () => { fullH = Math.max(fullH, window.innerHeight); setTimeout(fitBottom, 50); });
