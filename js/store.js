@@ -5,7 +5,7 @@
  *  2. a moment later stores each changed record in IndexedDB and queues it for the Google Sheet.
  * IndexedDB is the main copy. Nothing is ever deleted from it without a backup first.
  */
-const APP_VERSION = 8;
+const APP_VERSION = 9;
 const KEY = 'forge.v1';
 function seed() {
   const lib = [
@@ -21,7 +21,9 @@ function seed() {
   const by = n => lib.find(e => e.name === n).id;
   const P = (name, list) => ({ id: uid(), name, items: list.map(([n, s, r]) => ({ exId: by(n), sets: s, reps: r })) });
   return {
-    settings: { unit: 'kg', rest: 90, height: '', sheetUrl: '', autoSync: true, lastSync: 0 },
+    settings: { unit: 'kg', rest: 90, height: '', sheetUrl: '', autoSync: true, lastSync: 0,
+      bar: 20, plates: '25,20,15,10,5,2.5,1.25', weeklyGoal: 4, equipment: EQUIPMENT.slice(),
+      targets: { kcal: '', p: '', c: '', f: '', water: 2500 } },
     library: lib,
     plans: [
       P('Push', [['Barbell Bench Press',4,'6-8'],['Incline Dumbbell Press',3,'8-10'],['Overhead Press',3,'6-8'],['Dumbbell Lateral Raise',3,'12-15'],['Tricep Pushdown',3,'10-12']]),
@@ -29,6 +31,7 @@ function seed() {
       P('Legs', [['Back Squat',4,'5-8'],['Romanian Deadlift',3,'8-10'],['Leg Press',3,'10-12'],['Leg Curl',3,'12'],['Standing Calf Raise',4,'12-15']]),
     ],
     workouts: [], body: [], deleted: [], active: null,
+    photos: [], food: [], foods: [], meals: [], days: [], goals: [], suggestions: [],
   };
 }
 // Empty app for a phone that is about to download everything from the Sheet (no sample plans to duplicate)
@@ -148,6 +151,8 @@ async function pruneBackups() {
   if (drop.length) DB.delBackups(drop.map(b => b.id)).catch(() => {});
 }
 
+// Screen state (not saved)
+const ui = { seg: 'progress', range: '3M', muscle: '', mRange: 'week', rPeriod: 'week', rOffset: 0, day: '', recDay: '', planOpen: {}, libQ: '', libM: 'All', libE: 'All', profile: '' };
 let tab = 'workout';
 let editPlanId = null, picker = null, progEx = '', bodyMetric = 'weight', rest = null, wakeLock = null;
 

@@ -21,11 +21,16 @@ function renderPick() {
   if (!picker) return;
   $('#pm').innerHTML = ['All', ...MUSCLES].map(m => `<button class="chip btnchip ${m === picker.m ? 'on' : ''}" data-a="pm" data-m="${m}">${m}</button>`).join('');
   const q = picker.q.toLowerCase();
-  const list = S.library.filter(e => (picker.m === 'All' || e.muscle === picker.m) && e.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+  let list = S.library.filter(e => (picker.m === 'All' || e.muscle === picker.m) && e.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+  if (picker.mode === 'swap' && S.active && S.active.exercises[picker.swapI]) { // suggested alternatives first
+    const cur = lib(S.active.exercises[picker.swapI].exId), alts = (EXDB[cur.name]?.alts || []);
+    list = list.filter(e => e.id !== cur.id).sort((a, b) => (alts.includes(b.name) ? 1 : 0) - (alts.includes(a.name) ? 1 : 0));
+  }
   $('#plist').innerHTML = list.map(e => `<button class="li pick" data-a="pick-ex" data-id="${e.id}"><span class="vdot ${ytId(e.video) ? 'on' : ''}"></span><span class="grow"><span class="t">${esc(e.name)}</span><br><span class="muted xs">${e.muscle}</span></span><span class="chip">Add</span></button>`).join('') || '<div class="empty">No match — create it below.</div>';
 }
 function addToTarget(exId) {
   if (!picker) return;
+  if (picker.mode === 'swap' && S.active) return swapTo(exId);
   if (picker.mode === 'workout' && S.active) {
     const prev = prevSets(exId);
     S.active.exercises.push({ exId, target: '', showVid: false, sets: Array.from({ length: Math.max(3, prev.length) }, () => ({ w: '', r: '', done: false })) });
@@ -58,22 +63,28 @@ function startWorkout(planId) {
   if (S.active) { tab = 'workout'; render(); return toast('Finish your current workout first'); }
   const p = S.plans.find(x => x.id === planId);
   S.active = { id: uid(), name: p ? p.name : 'Workout', planId: p ? p.id : '', start: Date.now(),
-    exercises: p ? p.items.map(it => ({ exId: it.exId, target: it.reps, showVid: false, sets: Array.from({ length: Math.max(1, +it.sets || 1) }, () => ({ w: '', r: '', done: false })) })) : [] };
+    exercises: p ? p.items.map(it => ({ exId: it.exId, target: it.reps, hintW: it.weight || '', showVid: false, sets: Array.from({ length: Math.max(1, +it.sets || 1) }, () => ({ w: '', r: '', done: false })) })) : [] };
   editPlanId = null; tab = 'workout'; save(); render(); keepAwake(true); scrollTo(0, 0);
 }
 function finishWorkout() {
   const A = S.active;
+  // Set type, RPE and RIR are kept only when used, so older workouts and new ones look the same in the Sheet
   const exercises = A.exercises.map(e => ({ exId: e.exId, name: lib(e.exId).name, muscle: lib(e.exId).muscle,
-    sets: e.sets.filter(s => s.done).map(s => ({ w: num(s.w), r: Math.round(num(s.r)) })) })).filter(e => e.sets.length);
+    ...(e.group && groupInfo(A.exercises, A.exercises.indexOf(e)) ? { group: e.group } : {}), ...(e.note ? { note: e.note } : {}), ...(e.subOf ? { subOf: e.subOf } : {}),
+    sets: e.sets.filter(s => s.done).map(s => ({ w: num(s.w), r: Math.round(num(s.r)), ...(s.t && s.t !== 'n' ? { t: s.t } : {}), ...(s.rpe ? { rpe: +s.rpe } : {}), ...(s.rir !== undefined && s.rir !== '' ? { rir: +s.rir } : {}) })) })).filter(e => e.sets.length);
   if (!exercises.length) return ask('No sets were completed. Discard this workout?', 'Discard', () => { S.active = null; stopRest(); keepAwake(false); save(); render(); });
   const w = { id: A.id, name: A.name || 'Workout', planId: A.planId, start: A.start, end: Date.now(), exercises, notes: '', synced: false };
-  const prs = exercises.map(e => { const before = bestE1(e.exId, w.id), now = Math.max(...e.sets.map(s => e1rm(s.w, s.r))); return before && now > before ? { name: e.name, v: r1(now) } : null; }).filter(Boolean);
+  const prs = workoutPRs(w, S.workouts.concat([w])).map(p => ({ name: p.name, v: p.value, kind: p.kind }));
+  const worked = Object.entries(muscleSets([w], lib, 0, Infinity)).filter(([m]) => MUSCLE_INFO[m]?.group !== 'Cardio').sort((a, b) => b[1] - a[1]).slice(0, 6);
   S.workouts.push(w); S.active = null; stopRest(); keepAwake(false); save(); render();
   openSheet(`<div style="text-align:center;padding:6px 0 4px"><div style="font-size:44px">💪</div><h3 style="font-size:24px;margin-top:4px">Workout complete</h3><div class="muted sm" style="margin-top:4px">${esc(w.name)} · ${nice(w.start)} · ${Math.round((w.end - w.start) / 6e4)} min</div></div>
     ${compareHTML(w)}
-    ${prs.length ? `<h2 style="margin:18px 2px 4px">New records</h2>` : ''}${prs.map(p => `<div class="pr">${IC.trophy}<span>${esc(p.name)} — est. 1RM ${p.v} ${unit()}</span></div>`).join('')}
+    ${prs.length ? `<h2 style="margin:18px 2px 4px">New records</h2>` : ''}${prs.map(p => `<div class="pr">${IC.trophy}<span>${esc(p.name)} — ${p.kind === 'e1' ? 'est. 1RM' : 'heaviest'} ${p.v} ${unit()}</span></div>`).join('')}
+    ${worked.length ? `<h2 style="margin:18px 2px 6px">Muscles worked</h2><div class="chips">${worked.map(([m, n]) => `<span class="chip">${MUSCLE_INFO[m].name} · ${round1(n)} sets</span>`).join('')}</div>` : ''}
     <label class="f" style="margin-top:14px">How did it feel?<textarea class="in" id="wnotes" rows="2" placeholder="Energy, pain, what to change next time…"></textarea></label>
     <button class="btn acc block" data-a="notes-save" data-id="${w.id}">Done</button>`);
+  if (prs.length) haptic('success');
+  checkAwards();
   if (S.settings.autoSync && connected()) sync(false);
 }
 

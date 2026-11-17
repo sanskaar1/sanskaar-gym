@@ -5,7 +5,8 @@
  * and the settings are one more record ("settings/settings").
  * Pure functions only, so they can be tested without a browser (see tests/).
  */
-const SYNCED = ['workouts', 'body', 'plans', 'library'];
+// photos = photo details only (the images themselves stay on the phone / your Drive)
+const SYNCED = ['workouts', 'body', 'plans', 'library', 'photos', 'food', 'foods', 'meals', 'days', 'goals', 'suggestions'];
 const recKey = (c, id) => c + '/' + id;
 const splitKey = k => { const i = k.indexOf('/'); return [k.slice(0, i), k.slice(i + 1)]; };
 
@@ -62,7 +63,8 @@ function applyRecord(S, rec) {
 
 // Rebuilds the app's data from stored records (IndexedDB rows or a full download from the Sheet)
 function stateFromRecords(recs, base) {
-  const S = Object.assign({}, base, { workouts: [], body: [], plans: [], library: [], deleted: [] });
+  const S = Object.assign({}, base, { deleted: [] });
+  for (const c of SYNCED) S[c] = [];
   const sorted = [...recs].sort((a, b) => (a.i ?? 0) - (b.i ?? 0));
   for (const r of sorted) applyRecord(S, { c: r.c, id: r.id, v: r.v });
   return S;

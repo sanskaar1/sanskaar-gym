@@ -4,7 +4,7 @@ document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-a]'); if (!b) return;
   const a = b.dataset.a, i = +b.dataset.i, j = +b.dataset.j, id = b.dataset.id, A = S.active;
   switch (a) {
-    case 'tab': tab = b.dataset.t; editPlanId = null; render(); scrollTo(0, 0); break;
+    case 'tab': tab = b.dataset.t; editPlanId = null; if (tab === 'profile') ui.profile = ''; if (tab === 'nutrition') ui.day = ''; haptic(); render(); scrollTo(0, 0); break;
     case 'go-settings': if (tab !== 'settings') backTab = tab; tab = 'settings'; render(); scrollTo(0, 0); break;
     case 'back': tab = backTab; render(); scrollTo(0, 0); break;
     case 'unit': S.settings.unit = b.dataset.v; save(); render(); break;
@@ -14,17 +14,6 @@ document.addEventListener('click', ev => {
     case 'start': startWorkout(id); break;
     case 'finish': finishWorkout(); break;
     case 'discard': ask('Discard this workout? Nothing will be saved.', 'Discard', () => { S.active = null; stopRest(); keepAwake(false); save(); render(); }); break;
-    case 'done': {
-      const e = A.exercises[i], s = e.sets[j], p = prevSets(e.exId)[j], above = e.sets[j - 1];
-      s.done = !s.done;
-      if (s.done) { // empty fields take last session's numbers, else the set above
-        if (s.w === '') s.w = p ? String(p.w) : above && above.w !== '' ? above.w : '0';
-        if (s.r === '') s.r = p ? String(p.r) : above && above.r !== '' ? above.r : (String(e.target || '').split('-').pop() || '0');
-        navigator.vibrate && navigator.vibrate(25);
-        startRest(+S.settings.rest || 90);
-      }
-      save(); render(); break;
-    }
     case 'set-add': { const e = A.exercises[i], last = e.sets[e.sets.length - 1]; e.sets.push({ w: last ? last.w : '', r: last ? last.r : '', done: false }); save(); render(); break; }
     case 'set-rm': A.exercises[i].sets.pop(); save(); render(); break;
     case 'ex-rm': ask(`Remove ${lib(A.exercises[i].exId).name} from this workout?`, 'Remove', () => { A.exercises.splice(i, 1); save(); render(); }); break;
@@ -58,15 +47,8 @@ document.addEventListener('click', ev => {
     case 'plan-del': ask('Delete this plan?', 'Delete', () => { S.plans = S.plans.filter(p => p.id !== editPlanId); editPlanId = null; save(); render(); }); break;
     case 'pi-up': { const it = S.plans.find(p => p.id === editPlanId).items, k = +b.dataset.k; [it[k - 1], it[k]] = [it[k], it[k - 1]]; save(); render(); break; }
     case 'pi-rm': S.plans.find(p => p.id === editPlanId).items.splice(+b.dataset.k, 1); save(); render(); break;
-    case 'notes-save': { const w = S.workouts.find(x => x.id === id), n = $('#wnotes').value.trim(); if (w && n) { w.notes = n; w.synced = false; save(); if (S.settings.autoSync) sync(false); } closeSheet(); tab = 'progress'; render(); break; }
+    case 'notes-save': { const w = S.workouts.find(x => x.id === id), n = $('#wnotes').value.trim(); if (w && n) { w.notes = n; w.synced = false; save(); if (S.settings.autoSync) sync(false); } closeSheet(); tab = 'analytics'; ui.seg = 'progress'; render(); break; }
     case 'w-del': ask('Delete this workout permanently?', 'Delete', () => { S.workouts = S.workouts.filter(w => w.id !== id); save(); render(); sync(false); }); break;
-    case 'bm': bodyMetric = b.dataset.k; render(); break;
-    case 'body-save': {
-      const e = { id: uid(), date: $('#b_date').value || ymd(Date.now()), notes: $('#b_notes').value.trim(), synced: false };
-      let any = false; BODY_F().forEach(([k]) => { const v = $('#b_' + k).value.trim(); e[k] = v === '' ? '' : num(v); if (v !== '') any = true; });
-      if (!any) return toast('Enter at least one measurement');
-      S.body.push(e); save(); render(); toast('Body stats saved'); if (S.settings.autoSync) sync(false); break;
-    }
     case 'b-del': ask('Delete this body-stats entry?', 'Delete', () => { S.body = S.body.filter(x => x.id !== id); save(); render(); sync(false); }); break;
     case 'sync': sync(true); break;
     case 'connect': {
@@ -82,7 +64,7 @@ document.addEventListener('click', ev => {
     }); break;
     case 'export-json': download(`sanskaar-gym-backup-${ymd(Date.now())}.json`, JSON.stringify(S, null, 2), 'application/json'); break;
     case 'import-json': $('#importFile').click(); break;
-    case 'export-csv': download(`sanskaar-gym-workouts-${ymd(Date.now())}.csv`, csv([['Workout ID','Date','Start','Workout','Duration (min)','Exercise','Muscle','Set','Weight','Unit','Reps','Volume','Est. 1RM'], ...sorted().reverse().flatMap(workoutRows)]), 'text/csv'); break;
+    case 'export-csv': download(`sanskaar-gym-workouts-${ymd(Date.now())}.csv`, csv([['Workout ID','Date','Start','Workout','Duration (min)','Exercise','Muscle','Set','Weight','Unit','Reps','Volume','Est. 1RM','Set type','RPE','RIR','Superset','Note'], ...sorted().reverse().flatMap(workoutRows)]), 'text/csv'); break;
     case 'reset': ask(connected() ? 'Reset this phone? Everything here is cleared and downloaded again from your Google Sheet. Your Sheet is not changed, and a backup of this phone is kept.'
       : 'Reset this phone? Your plans, workouts and body stats here are cleared. A backup is kept in Settings → Backups on this phone.', 'Reset', async () => {
         await backupNow('Before resetting this phone');
@@ -93,10 +75,12 @@ document.addEventListener('click', ev => {
       }); break;
     case 'backups': openBackups(); break;
     case 'restore-b': restoreBackup(id); break;
+    default: if (ACT[a]) ACT[a](b, ev);
   }
 });
 document.addEventListener('input', ev => {
   const t = ev.target, d = t.dataset;
+  if (d.c && CHG[d.c]) { if (t.type === 'range' || 'live' in d) CHG[d.c](t, ev); return; }
   if (d.f && S.active) { S.active.exercises[+d.i].sets[+d.j][d.f] = t.value; save(); const ws = $('#wsum'); if (ws) ws.textContent = summaryText(); }
   else if ('actName' in d && S.active) { S.active.name = t.value; save(); }
   else if ('planName' in d) { S.plans.find(p => p.id === editPlanId).name = t.value; save(); }
@@ -105,6 +89,7 @@ document.addEventListener('input', ev => {
 });
 document.addEventListener('change', ev => {
   const t = ev.target, d = t.dataset;
+  if (d.c && CHG[d.c]) { if (t.type !== 'range' && !('live' in d)) CHG[d.c](t, ev); return; }
   if (d.vid) { const ex = S.library.find(e => e.id === d.vid); if (ex) { ex.video = t.value.trim(); save(); render(); if (t.value && !ytId(t.value)) toast("That doesn't look like a YouTube link"); } }
   else if (d.set) { S.settings[d.set] = t.type === 'checkbox' ? t.checked : t.value.trim(); save(); render(); }
   else if ('progEx' in d) { progEx = t.value; render(); }

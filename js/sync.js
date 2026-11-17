@@ -29,9 +29,13 @@ async function api(action, data, key = apiKey, tries = 2) {
 
 function workoutRows(w) {
   const dur = Math.round((w.end - w.start) / 6e4), time = new Date(w.start).toTimeString().slice(0, 5);
-  return w.exercises.flatMap(e => e.sets.map((s, k) => [w.id, ymd(w.start), time, w.name, dur, e.name, e.muscle, k + 1, s.w, unit(), s.r, r1(s.w * s.r), r1(e1rm(s.w, s.r))]));
+  const TYPE = { w: 'Warm-up', d: 'Drop', f: 'Failure' };
+  return w.exercises.flatMap(e => e.sets.map((s, k) => [w.id, ymd(w.start), time, w.name, dur, e.name, e.muscle, k + 1, s.w, unit(), s.r,
+    s.t === 'w' ? 0 : r1(s.w * s.r), s.t === 'w' ? '' : r1(e1rm(s.w, s.r)), TYPE[s.t] || 'Working', s.rpe || '', s.rir ?? '', e.group || '', k === 0 ? (e.note || '') : '']));
 }
-const bodyRow = b => [b.id, b.date, b.weight, unit(), b.bf, b.waist, b.chest, b.arms, b.thighs, lenUnit(), b.notes || ''];
+const bodyRow = b => [b.id, b.date, b.weight, unit(), b.bf, b.waist, b.chest, b.arms, b.thighs, lenUnit(), b.notes || '', b.shoulders ?? '', b.forearms ?? '', b.calves ?? '', b.neck ?? ''];
+const foodRow = e => [e.id, e.date, e.meal, e.name, e.amount || '', e.kcal, e.p, e.c, e.f, ({ label: 'Label', typical: 'Typical (estimate)', estimate: 'AI estimate', custom: 'Your entry' })[e.src] || ''];
+const dayRow = r => [r.id, r.sleep ?? '', r.sleepQ ?? '', r.fatigue ?? '', Object.keys(r.sore || {}).filter(k => r.sore[k]).map(k => k + ' ' + r.sore[k]).join(', '), r.rest ? 'Yes' : '', r.rhr ?? '', r.hrv ?? '', r.water ?? '', r.src || 'app', r.notes || ''];
 
 let syncing = false, again = false, syncT, lastSnapshot = 0;
 function scheduleSync() { if (!connected() || !S.settings.autoSync) return; clearTimeout(syncT); syncT = setTimeout(() => sync(false), 2500); }
@@ -40,7 +44,7 @@ function scheduleSync() { if (!connected() || !S.settings.autoSync) return; clea
 function outgoing(k, recs) {
   const [c, id] = splitKey(k), r = recs.get(k), u = meta.ts[k] || Date.now();
   if (!r) return { c, id, u, d: true };
-  const rows = c === 'workouts' ? workoutRows(r.v) : c === 'body' ? [bodyRow(r.v)] : null;
+  const rows = c === 'workouts' ? workoutRows(r.v) : c === 'body' ? [bodyRow(r.v)] : c === 'food' ? [foodRow(r.v)] : c === 'days' ? [dayRow(r.v)] : null;
   return { c, id, u, v: r.v, rows };
 }
 async function pushOutbox() {

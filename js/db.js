@@ -3,16 +3,16 @@
  * records: key "c/id" -> { c, id, v, i }
  * meta:    key -> value (sync bookkeeping, the workout in progress)
  * backups: { id, at, reason, data }  full copies of the app kept on this device
+ * blobs:   photo id -> image Blob (progress photos stay on this phone; a copy goes to your Drive if connected)
  */
 const DB = (() => {
   let opening;
   const open = () => opening || (opening = new Promise((res, rej) => {
-    const r = indexedDB.open('sanskaar-gym', 1);
-    r.onupgradeneeded = () => {
-      const d = r.result;
-      d.createObjectStore('records');
-      d.createObjectStore('meta');
-      d.createObjectStore('backups', { keyPath: 'id' });
+    const r = indexedDB.open('sanskaar-gym', 2);
+    r.onupgradeneeded = e => {
+      const d = r.result, old = e.oldVersion;
+      if (old < 1) { d.createObjectStore('records'); d.createObjectStore('meta'); d.createObjectStore('backups', { keyPath: 'id' }); }
+      if (old < 2) d.createObjectStore('blobs');
     };
     r.onsuccess = () => res(r.result);
     r.onerror = () => { opening = null; rej(r.error); };
@@ -43,6 +43,9 @@ const DB = (() => {
     },
     async backups() { return (await entries('backups')).map(e => e[1]).sort((a, b) => b.at - a.at); },
     async putBackup(b) { const d = await open(), t = d.transaction('backups', 'readwrite'); t.objectStore('backups').put(b); return done(t); },
+    async putBlob(k, blob) { const d = await open(), t = d.transaction('blobs', 'readwrite'); t.objectStore('blobs').put(blob, k); return done(t); },
+    async getBlob(k) { const d = await open(), t = d.transaction('blobs', 'readonly'); return req(t.objectStore('blobs').get(k)); },
+    async delBlob(k) { const d = await open(), t = d.transaction('blobs', 'readwrite'); t.objectStore('blobs').delete(k); return done(t); },
     async delBackups(ids) { const d = await open(), t = d.transaction('backups', 'readwrite'); ids.forEach(id => t.objectStore('backups').delete(id)); return done(t); },
   };
 })();

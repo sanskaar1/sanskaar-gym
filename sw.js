@@ -3,8 +3,8 @@
  * Offline, or when the network takes more than 4 seconds, the stored copy is used.
  * Requests to Google (the Sheet) are never touched. */
 const CACHE = 'sgym-shell';
-const SHELL = ['./', 'index.html', 'css/app.css', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
-  'js/util.js', 'js/records.js', 'js/db.js', 'js/store.js', 'js/calc.js', 'js/views.js', 'js/overlays.js', 'js/sync.js', 'js/actions.js', 'js/viewport.js', 'js/main.js'];
+const SHELL = ['./', 'index.html', 'css/app.css', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'vendor/jspdf.umd.min.js',
+  'vendor/chart.umd.min.js', 'js/util.js', 'js/videos.js', 'js/exdb.js', 'js/records.js', 'js/db.js', 'js/store.js', 'js/analytics.js', 'js/ui.js', 'js/calc.js', 'js/views.js', 'js/train.js', 'js/library.js', 'js/body.js', 'js/muscles.js', 'js/coach.js', 'js/nutrition.js', 'js/recovery.js', 'js/reports.js', 'js/screens.js', 'js/overlays.js', 'js/sync.js', 'js/media.js', 'js/actions.js', 'js/viewport.js', 'js/main.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));

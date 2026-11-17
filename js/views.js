@@ -1,13 +1,19 @@
 'use strict';
 /* ---------- rendering ---------- */
-const TABS = [['workout','Workout'],['plans','Plans'],['progress','Progress'],['body','Body']]; // Settings opens from the gear at the top
+const TABS = [['workout','Workout'],['plans','Plans'],['analytics','Analytics'],['nutrition','Nutrition'],['profile','Profile']]; // Settings opens from the gear at the top
 let backTab = 'workout';
 function render() {
   $('#nav').innerHTML = TABS.map(([k, l]) => `<button class="${tab === k ? 'on' : ''}" data-a="tab" data-t="${k}">${IC[k]}${l}</button>`).join('');
   const pending = pendingCount();
   $('#syncPill').innerHTML = !connected() ? '<span class="dot"></span>Local only'
     : pending ? `<span class="dot warn"></span>${pending} to sync` : '<span class="dot ok"></span>Synced';
-  $('#view').innerHTML = ({ workout: viewWorkout, plans: viewPlans, progress: viewProgress, body: viewBody, settings: viewSettings })[tab]();
+  const views = { workout: viewWorkout, plans: viewPlans, analytics: viewAnalytics, nutrition: viewNutrition, profile: viewProfile, settings: viewSettings };
+  const v = $('#view'), key = tab + '/' + ui.seg + '/' + ui.profile;
+  v.innerHTML = (views[tab] || viewWorkout)();
+  if (v.dataset.k !== key) { v.dataset.k = key; v.classList.remove('fade-in'); void v.offsetWidth; v.classList.add('fade-in'); }
+  mountCharts();
+  const on = v.querySelector('.segbar.scroll .on'); // keep the chosen tab visible in a scrolling tab bar
+  if (on) on.parentNode.scrollLeft = on.offsetLeft - (on.parentNode.clientWidth - on.offsetWidth) / 2;
 }
 
 /* ---- Workout tab ---- */
@@ -43,59 +49,6 @@ function viewWorkout() {
     </div>`).join('') : `<div class="card empty">No plans yet. Create one in <b>Plans</b>.</div>`}`;
 }
 
-function viewActive() {
-  const A = S.active;
-  return `
-  <div class="row between gap" style="margin:6px 0 14px">
-    <div style="flex:1;min-width:0">
-      <input class="title-in" data-act-name value="${esc(A.name)}" aria-label="Workout name">
-      <div class="live"><i></i><span id="elapsed">${fmtDur(Date.now() - A.start)}</span> · <span id="wsum">${summaryText()}</span></div>
-    </div>
-    <button class="btn acc" data-a="finish">Finish</button>
-  </div>
-  ${A.exercises.length ? A.exercises.map(exCard).join('') : `<div class="card empty">No exercises yet. Add your first one.</div>`}
-  <button class="btn block" data-a="pick" data-mode="workout">+ Add exercise</button>
-  <button class="btn danger block" data-a="discard">Discard workout</button>`;
-}
-function summaryText() {
-  const A = S.active; let n = 0, v = 0;
-  A.exercises.forEach(e => e.sets.forEach(s => { if (s.done) { n++; v += num(s.w) * num(s.r); } }));
-  return `${n} sets · ${fmtN(v)} ${unit()}`;
-}
-function exCard(e, i) {
-  const ex = lib(e.exId), prev = prevSets(e.exId);
-  const complete = e.sets.length && e.sets.every(s => s.done);
-  return `
-  <section class="card ex ${complete ? 'complete' : ''}">
-    <div class="ex-head">
-      <div style="min-width:0">
-        <div class="ex-name">${esc(ex.name)}</div>
-        <div class="chips"><span class="chip">${esc(ex.muscle)}</span>${e.target ? `<span class="chip ghost">Target ${esc(e.target)} reps</span>` : ''}</div>
-      </div>
-      <div class="ex-tools">
-        <button class="icon ${e.showVid ? 'on' : ''}" data-a="vid" data-i="${i}" aria-label="Reference video">${IC.play}</button>
-        ${i ? `<button class="icon" data-a="ex-up" data-i="${i}" aria-label="Move up">${IC.up}</button>` : ''}
-        <button class="icon" data-a="ex-rm" data-i="${i}" aria-label="Remove exercise">${IC.x}</button>
-      </div>
-    </div>
-    ${e.showVid ? videoPanel(ex) : ''}
-    <div class="sets">
-      <div class="set-row hd"><span>Set</span><span>Previous</span><span>${unit()}</span><span>Reps</span><span></span></div>
-      ${e.sets.map((s, j) => { const p = prev[j]; return `
-      <div class="set-row ${s.done ? 'done' : ''}">
-        <span class="sn">${j + 1}</span>
-        <span class="prev">${p ? `${p.w} × ${p.r}` : '—'}</span>
-        <input inputmode="decimal" data-i="${i}" data-j="${j}" data-f="w" value="${esc(s.w)}" placeholder="${p ? p.w : unit()}">
-        <input inputmode="numeric" data-i="${i}" data-j="${j}" data-f="r" value="${esc(s.r)}" placeholder="${p ? p.r : esc(String(e.target || '').split('-').pop() || '0')}">
-        <button class="chk" data-a="done" data-i="${i}" data-j="${j}" aria-label="Complete set">${IC.check}</button>
-      </div>`; }).join('')}
-    </div>
-    <div class="ex-foot">
-      <button class="btn sm" data-a="set-add" data-i="${i}">+ Add set</button>
-      ${e.sets.length ? `<button class="btn sm ghost" data-a="set-rm" data-i="${i}">− Remove set</button>` : ''}
-    </div>
-  </section>`;
-}
 function videoPanel(ex) {
   const id = ytId(ex.video), q = encodeURIComponent(ex.name + ' proper form tutorial');
   return `<div class="vid">
@@ -105,26 +58,6 @@ function videoPanel(ex) {
   </div>`;
 }
 
-/* ---- Plans tab ---- */
-function viewPlans() {
-  if (editPlanId) return viewPlanEdit();
-  const groups = MUSCLES.map(m => [m, S.library.filter(e => e.muscle === m).sort((a, b) => a.name.localeCompare(b.name))]).filter(g => g[1].length);
-  return `
-  <h2 style="margin-top:6px">Your plans</h2>
-  ${S.plans.map(p => `
-    <div class="card plan-card">
-      <div class="grow"><div class="nm">${esc(p.name)}</div>
-        <div class="muted sm ellip">${p.items.map(i => `${esc(lib(i.exId).name)} ${i.sets}×${esc(i.reps)}`).join(' · ') || 'No exercises'}</div></div>
-      <button class="btn sm" data-a="plan-edit" data-id="${p.id}">Edit</button>
-      <button class="btn sm acc" data-a="start" data-id="${p.id}">Start</button>
-    </div>`).join('')}
-  <button class="btn block" data-a="plan-new">+ New plan</button>
-  <div class="row between"><h2>Exercise library</h2><button class="btn sm ghost" data-a="ex-new" style="margin-top:14px">+ Custom</button></div>
-  <div class="card" style="padding:4px 14px">
-    ${groups.map(([m, list]) => `<div class="xs muted" style="padding:12px 2px 2px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">${m}</div>` +
-      list.map(e => `<button class="li pick" data-a="ex-edit" data-id="${e.id}"><span class="vdot ${ytId(e.video) ? 'on' : ''}"></span><span class="grow t">${esc(e.name)}</span><span class="muted xs">${ytId(e.video) ? 'video' : 'add video'}</span></button>`).join('')).join('')}
-  </div>`;
-}
 function viewPlanEdit() {
   const p = S.plans.find(x => x.id === editPlanId);
   if (!p) { editPlanId = null; return viewPlans(); }
@@ -146,84 +79,6 @@ function viewPlanEdit() {
   <button class="btn danger block" data-a="plan-del">Delete plan</button>`;
 }
 
-/* ---- Progress tab ---- */
-function viewProgress() {
-  const ws = sorted();
-  if (!ws.length) return `<h2 style="margin-top:6px">Progress</h2><div class="card empty">Finish your first workout and your charts will show up here.</div>`;
-  const total = ws.reduce((a, w) => a + wVolume(w), 0);
-  const avgMin = ws.reduce((a, w) => a + (w.end - w.start), 0) / ws.length / 6e4;
-  const wk = weekStart(Date.now());
-  const weeks = Array.from({ length: 8 }, (_, k) => { const t = wk - (7 - k) * 7 * 864e5; return { x: short(t), y: ws.filter(w => w.start >= t && w.start < t + 7 * 864e5).reduce((a, w) => a + wVolume(w), 0) }; });
-  const used = [...new Set(ws.flatMap(w => w.exercises.map(e => e.exId)))];
-  if (!used.includes(progEx)) progEx = used[0];
-  const pts = [...ws].reverse().map(w => { const e = w.exercises.find(x => x.exId === progEx); return e && { x: short(w.start), y: r1(Math.max(...e.sets.map(s => e1rm(s.w, s.r)))) }; }).filter(Boolean);
-  let best = null; ws.forEach(w => w.exercises.forEach(e => { if (e.exId === progEx) e.sets.forEach(s => { if (!best || s.w > best.w || (s.w === best.w && s.r > best.r)) best = { ...s, t: w.start }; }); }));
-  const muscle = {}; ws.filter(w => w.start >= wk - 21 * 864e5).forEach(w => w.exercises.forEach(e => muscle[lib(e.exId).muscle] = (muscle[lib(e.exId).muscle] || 0) + e.sets.length));
-  const mMax = Math.max(1, ...Object.values(muscle));
-  return `
-  <h2 style="margin-top:6px">Overview</h2>
-  <div class="tiles" style="margin-top:0">
-    <div class="tile"><div class="v">${ws.length}</div><div class="l">Workouts</div></div>
-    <div class="tile"><div class="v">${fmtN(total)}</div><div class="l">Total ${unit()} lifted</div></div>
-    <div class="tile"><div class="v">${Math.round(avgMin)}<span class="sm muted">m</span></div><div class="l">Avg duration</div></div>
-  </div>
-  <h2>Weekly volume</h2>
-  <div class="card">${barChart(weeks)}</div>
-  <h2>Strength — estimated 1-rep max</h2>
-  <div class="card">
-    <select class="in" data-prog-ex>${used.map(id => `<option value="${id}" ${id === progEx ? 'selected' : ''}>${esc(lib(id).name)}</option>`).join('')}</select>
-    ${best ? `<div class="row between sm" style="margin-top:12px"><span class="muted">Best set</span><b>${best.w} ${unit()} × ${best.r} <span class="muted" style="font-weight:400">· ${short(best.t)}</span></b></div>` : ''}
-    ${lineChart(pts, v => v + ' ' + unit())}
-  </div>
-  <h2>Sets per muscle · last 4 weeks</h2>
-  <div class="card">${Object.entries(muscle).sort((a, b) => b[1] - a[1]).map(([m, n]) => `
-    <div style="margin:6px 0"><div class="row between sm"><span>${m}</span><b>${n}</b></div>
-    <div style="height:8px;border-radius:9px;background:var(--card2);margin-top:5px"><div style="height:100%;width:${n / mMax * 100}%;background:var(--acc);border-radius:9px"></div></div></div>`).join('') || '<div class="empty">No sets in the last 4 weeks.</div>'}</div>
-  <h2>History</h2>
-  <div class="card" style="padding:2px 14px">${ws.map(w => `
-    <details class="w"><summary><div><div class="t" style="font-weight:600">${esc(w.name)}</div><div class="muted xs">${nice(w.start)} · ${Math.round((w.end - w.start) / 6e4)} min · ${fmtN(wVolume(w))} ${unit()}</div></div><span class="muted xs">${w.synced ? '✓ sheet' : ''}</span></summary>
-      <div class="wd">${compareHTML(w)}
-      ${w.notes ? `<p class="muted">${esc(w.notes)}</p>` : ''}
-      <button class="btn sm danger" style="margin-top:8px" data-a="w-del" data-id="${w.id}">Delete workout</button></div>
-    </details>`).join('')}</div>`;
-}
-
-/* ---- Body tab ---- */
-const BODY_F = () => [['weight','Weight',unit()],['bf','Body fat','%'],['waist','Waist',lenUnit()],['chest','Chest',lenUnit()],['arms','Arms',lenUnit()],['thighs','Thighs',lenUnit()]];
-function viewBody() {
-  const list = [...S.body].sort((a, b) => b.date.localeCompare(a.date));
-  const latest = list[0], prevE = list[1];
-  const h = num(S.settings.height);
-  const bmi = latest && latest.weight && h ? (unit() === 'kg' ? latest.weight / ((h / 100) ** 2) : 703 * latest.weight / (h ** 2)) : 0;
-  const series = [...list].reverse().filter(b => b[bodyMetric] !== '' && b[bodyMetric] != null).map(b => ({ x: short(b.date + 'T12:00'), y: num(b[bodyMetric]) }));
-  const F = BODY_F(), fm = F.find(f => f[0] === bodyMetric);
-  return `
-  <h2 style="margin-top:6px">Log body stats</h2>
-  <div class="card">
-    <label class="f">Date<div class="in datef"><span id="b_date_txt">${nice(Date.now())}</span>${IC.cal}<input type="date" id="b_date" value="${ymd(Date.now())}" aria-label="Date"></div></label>
-    <div class="grid2" style="margin-top:10px">${F.map(([k, l, u]) => `<label class="f">${l} (${u})<input class="in" inputmode="decimal" id="b_${k}" placeholder="${latest && latest[k] !== '' ? latest[k] : ''}"></label>`).join('')}</div>
-    <label class="f" style="margin-top:10px">Notes<input class="in" id="b_notes" placeholder="Sleep, diet, how you feel…"></label>
-    <button class="btn acc block" data-a="body-save">Save entry</button>
-  </div>
-  ${latest ? `
-  <h2>Latest · ${short(latest.date + 'T12:00')}</h2>
-  <div class="tiles" style="margin-top:0">
-    ${F.filter(([k]) => latest[k] !== '' && latest[k] != null).map(([k, l, u]) => { const d = prevE && prevE[k] !== '' ? r1(num(latest[k]) - num(prevE[k])) : null;
-      return `<div class="tile"><div class="v">${latest[k]}<span class="sm muted"> ${u}</span></div><div class="l">${l} ${d ? `<span class="delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d)}</span>` : ''}</div></div>`; }).join('')}
-    ${bmi ? `<div class="tile"><div class="v">${r1(bmi)}</div><div class="l">BMI</div></div>` : ''}
-  </div>
-  <h2>Trend</h2>
-  <div class="card">
-    <div class="chips scroll" style="margin-top:0">${F.map(([k, l]) => `<button class="chip btnchip ${k === bodyMetric ? 'on' : ''}" data-a="bm" data-k="${k}">${l}</button>`).join('')}</div>
-    ${lineChart(series, v => v + ' ' + fm[2])}
-  </div>
-  <h2>Entries</h2>
-  <div class="card" style="padding:2px 14px">${list.map(b => `
-    <div class="li"><div class="grow"><div class="t">${nice(b.date + 'T12:00')}</div>
-      <div class="muted xs">${F.filter(([k]) => b[k] !== '' && b[k] != null).map(([k, l, u]) => `${l} ${b[k]}${u === '%' ? '%' : ' ' + u}`).join(' · ')}${b.notes ? ' · ' + esc(b.notes) : ''}</div></div>
-      <button class="icon" data-a="b-del" data-id="${b.id}">${IC.x}</button></div>`).join('')}</div>` : ''}`;
-}
-
 /* ---- Settings (opens from the gear; not a main tab) ---- */
 const ago = t => { const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : short(t); };
 const srow = (ic, t, sub, right, a, neutral) => `<${a ? `button data-a="${a}"` : 'div'} class="srow"><span class="ic ${neutral ? 'n' : ''}">${IC[ic]}</span><div class="grow"><div class="t">${t}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>${right}</${a ? 'button' : 'div'}>`;
@@ -239,6 +94,7 @@ function viewSettings() {
     ${srow('scale', 'Units', 'Weight &amp; size', `<div class="seg"><button class="${st.unit === 'kg' ? 'on' : ''}" data-a="unit" data-v="kg">kg</button><button class="${st.unit === 'lb' ? 'on' : ''}" data-a="unit" data-v="lb">lb</button></div>`)}
     ${srow('timer', 'Rest timer', 'After each set', `<div class="stepper"><button data-a="rest-step" data-d="-15" aria-label="Less rest">−</button><span>${fmtDur(rs * 1000)}</span><button data-a="rest-step" data-d="15" aria-label="More rest">+</button></div>`)}
     ${srow('ruler', 'Height', 'For BMI', `<input class="mini-in" inputmode="decimal" data-set="height" value="${esc(st.height)}" placeholder="—"><span class="muted sm">${lenUnit()}</span>`)}
+    ${trainingSettings()}
   </div>
 
   <div class="gh">Google Sheet</div>
@@ -247,6 +103,8 @@ function viewSettings() {
     : `<div class="srow" style="flex-wrap:wrap"><span class="ic">${IC.cloud}</span><div class="grow"><div class="t">Connect your Sheet</div><div class="s">Enter your private key once on this device</div></div>
        <div class="row gap" style="width:100%"><input class="in" id="apikey" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="xxxx-xxxx-xxxx-xxxx"><button class="btn acc" data-a="connect">Connect</button></div></div>`}
   </div>
+
+  ${mediaCard()}
 
   <div class="gh">Your data</div>
   <div class="group">

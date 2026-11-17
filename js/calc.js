@@ -1,20 +1,20 @@
 'use strict';
+// How a set reads in summaries: warm-ups are marked W, drop sets D, sets to failure F
+const setTxt = s => (s.t && s.t !== 'n' ? s.t.toUpperCase() + ' ' : '') + `${s.w}×${s.r}` + (s.rpe ? ` @${s.rpe}` : '');
 function prevSets(exId) {
   for (const w of sorted()) { const e = w.exercises.find(x => x.exId === exId); if (e) return e.sets; }
   return [];
 }
 function bestE1(exId, skipId) {
   let b = 0;
-  for (const w of S.workouts) if (w.id !== skipId) for (const e of w.exercises) if (e.exId === exId) for (const s of e.sets) b = Math.max(b, e1rm(s.w, s.r));
+  for (const w of S.workouts) if (w.id !== skipId) for (const e of w.exercises) if (e.exId === exId) for (const s of workSets(e)) b = Math.max(b, e1rm(s.w, s.r));
   return b;
 }
-const wVolume = w => w.exercises.reduce((a, e) => a + e.sets.reduce((b, s) => b + s.w * s.r, 0), 0);
+const wVolume = workoutVolume; // warm-up sets don't count
 
 /* ---------- this session vs last time ---------- */
-const exVol = e => e.sets.reduce((a, s) => a + s.w * s.r, 0);
-const exReps = e => e.sets.reduce((a, s) => a + s.r, 0);
-const wSets = w => w.exercises.reduce((a, e) => a + e.sets.length, 0);
-const wReps = w => w.exercises.reduce((a, e) => a + exReps(e), 0);
+const exVol = exerciseVolume, exReps = e => workSets(e).reduce((a, s) => a + s.r, 0);
+const wSets = workoutSets, wReps = workoutReps;
 const before = w => sorted().filter(x => x.id !== w.id && x.start < w.start);
 // The last time this same plan was done (or a workout with the same name, for ones started empty)
 const lastSession = w => before(w).find(x => w.planId ? x.planId === w.planId : x.name.trim().toLowerCase() === w.name.trim().toLowerCase());
@@ -50,7 +50,7 @@ function compareHTML(w) {
     </div>`;
   }
   const list = rows.map(({ e, p, now, was, u }) => `<div class="cmp-ex"><div style="min-width:0"><div class="n ellip">${esc(e.name)}</div>
-      <div class="x ellip">${p ? `${p.sets.map(s => `${s.w}×${s.r}`).join(', ')} → <b style="color:var(--text)">${e.sets.map(s => `${s.w}×${s.r}`).join(', ')}</b>` : e.sets.map(s => `${s.w}×${s.r}`).join(', ')}</div></div>
+      <div class="x ellip">${p ? `${p.sets.map(setTxt).join(', ')} → <b style="color:var(--text)">${e.sets.map(setTxt).join(', ')}</b>` : e.sets.map(setTxt).join(', ')}</div></div>
       <div class="r">${p ? `${signed(now - was)} ${u}<small>${was ? `<span class="${now > was ? 'better' : 'lower'}">${signed((now - was) / was * 100, 1)}%</span>` : ''}</small>` : '<span class="better">New</span>'}</div></div>`).join('');
   return head + `<h2 style="margin:18px 2px 4px">Exercise by exercise</h2><div>${list}</div>`;
 }
