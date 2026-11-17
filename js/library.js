@@ -16,7 +16,7 @@ function viewPlans() {
         <button class="pex-row" data-a="ex-info" data-id="${ex.id}">
           ${v ? `<span class="thumb"><img src="${ytThumb(v.id)}" alt="" loading="lazy">${IC.play}</span>` : `<span class="thumb none">${IC.play}</span>`}
           <span class="grow" style="min-width:0"><span class="t ellip">${k + 1}. ${esc(ex.name)}</span>
-            <span class="muted xs ellip">${it.sets} × ${esc(it.reps)}${it.weight ? ` · next ${it.weight} ${unit()}` : ''}${v ? ' · ' + esc(v.channel || 'video') : ' · no video'}</span></span></button>`; }).join('') || '<div class="empty">No exercises yet.</div>'}</div>` : ''}
+            <span class="muted xs ellip">${it.sets} × ${esc(it.reps)}${it.weight ? ` · next ${it.weight} ${unit()}` : ''}${v ? ' · ' + esc(v.channel || 'video') : ' · no video'}</span></span>${IC.chev}</button>`; }).join('') || '<div class="empty">No exercises yet.</div>'}</div>` : ''}
     </section>`; }).join('') || emptyCard('No plans yet', 'Create your first plan.')}
   <button class="btn block" data-a="plan-new">+ New plan</button>
   ${viewLibrary()}`;
