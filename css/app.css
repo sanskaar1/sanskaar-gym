@@ -293,6 +293,6 @@ pre.code{white-space:pre-wrap;word-break:break-all;background:var(--card2);borde
 svg.chev{width:14px;height:14px;flex:0 0 14px;color:var(--muted)}
 #libList .li .grow>.muted{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 #libList .li .grow>br{display:none}
-#libList .thumb.sm{width:72px;height:40px}
+#libList .li{padding:10px 2px}#libList .li .t{font-size:15px}
 :where(svg[viewBox="0 0 24 24"]){width:20px;height:20px;flex-shrink:0}
 .pex-row .grow,#libList .li .grow,.grow{flex:1 1 auto;min-width:0}

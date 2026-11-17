@@ -36,7 +36,7 @@ function viewLibrary() {
   <div class="card" style="padding:4px 12px;margin-top:10px" id="libList">${libRows(list)}</div>`;
 }
 const libRows = list => list.map(e => { const v = vidOf(e); return `<button class="li pick" data-a="ex-info" data-id="${e.id}">
-    ${v ? `<span class="thumb sm"><img src="${ytThumb(v.id)}" alt="" loading="lazy"></span>` : `<span class="thumb sm none">${IC.play}</span>`}
+    ${v ? `<span class="thumb"><img src="${ytThumb(v.id)}" alt="" loading="lazy">${IC.play}</span>` : `<span class="thumb none">${IC.play}</span>`}
     <span class="grow" style="min-width:0"><span class="t ellip">${esc(e.name)}</span><br><span class="muted xs">${esc(musclesOf(e).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || e.muscle)}${e.equipment ? ' · ' + e.equipment : ''}${e.level ? ' · ' + e.level : ''}</span></span></button>`; }).join('') || '<div class="empty">No exercise matches.</div>';
 ACT['lib-m'] = b => { ui.libM = b.dataset.v; render(); };
 ACT['lib-e'] = b => { ui.libE = b.dataset.v; render(); };
