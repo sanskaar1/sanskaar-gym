@@ -46,11 +46,21 @@ function mountCharts() {
   if (!window.Chart) return;
   for (const { id, make } of q) { const el = document.getElementById(id); if (el) try { chartsLive.push(new Chart(el, make(el))); } catch (e) { console.warn('chart', e); } }
 }
-if (window.Chart) {
-  Chart.defaults.color = '#8b929c'; Chart.defaults.font.family = 'Inter, system-ui, sans-serif'; Chart.defaults.font.size = 11;
-  Chart.defaults.borderColor = 'rgba(255,255,255,.06)'; Chart.defaults.animation.duration = 450;
+/* ---------- theme: light or dark, chosen in Settings ---------- */
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const ACC = () => cssVar('--chartAcc'); // the yellow, in a shade that reads on the current background
+let themeOn = '';
+function applyTheme() {
+  const t = S.settings.theme === 'dark' ? 'dark' : 'light';
+  if (t === themeOn) return;
+  themeOn = t; document.documentElement.dataset.theme = t;
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = cssVar('--bg');
+  PALETTE.weight = PALETTE.kcal = ACC();
+  if (!window.Chart) return;
+  Chart.defaults.color = cssVar('--muted'); Chart.defaults.font.family = "'DM Sans', Inter, system-ui, sans-serif"; Chart.defaults.font.size = 11;
+  Chart.defaults.borderColor = cssVar('--line'); Chart.defaults.animation.duration = 450;
   Chart.defaults.plugins.legend.display = false;
-  Object.assign(Chart.defaults.plugins.tooltip, { backgroundColor: '#1c2027', borderColor: '#2b313a', borderWidth: 1, padding: 10, displayColors: false, titleColor: '#e9ecef', bodyColor: '#e9ecef' });
+  Object.assign(Chart.defaults.plugins.tooltip, { backgroundColor: cssVar('--solid'), borderColor: cssVar('--solid'), borderWidth: 1, padding: 10, displayColors: false, titleColor: cssVar('--onSolid'), bodyColor: cssVar('--onSolid') });
 }
 const fade = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
 const gradientFor = (el, color) => { const g = el.getContext('2d').createLinearGradient(0, 0, 0, el.parentNode.clientHeight || 170); g.addColorStop(0, fade(color, .35)); g.addColorStop(1, fade(color, 0)); return g; };
@@ -83,14 +93,14 @@ function barChart2(labels, datasets, opts = {}) {
 function doughnut2(labels, values, colors, opts = {}) {
   return chartBox(() => ({
     type: 'doughnut',
-    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#14171c', borderWidth: 3, hoverOffset: 6 }] },
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: cssVar('--card'), borderWidth: 3, hoverOffset: 6 }] },
     options: { maintainAspectRatio: false, cutout: '64%', plugins: { legend: { display: true, position: 'right', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, padding: 10 } }, tooltip: { callbacks: { label: it => `${it.label}: ${(opts.fmt || (x => x))(it.parsed)}` } } } },
   }), opts.h || 190);
 }
 // Ring progress (calories, macros, goals) drawn with SVG so it needs no library
 function ring(value, target, color, label, sub, size = 92) {
   const r = 38, c = 2 * Math.PI * r, p = target ? Math.min(1, value / target) : 0, over = target && value > target;
-  return `<div class="ring" style="width:${size}px"><svg viewBox="0 0 100 100" width="${size}" height="${size}"><circle cx="50" cy="50" r="${r}" fill="none" stroke="#232831" stroke-width="10"/>
+  return `<div class="ring" style="width:${size}px"><svg viewBox="0 0 100 100" width="${size}" height="${size}"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--track)" stroke-width="10"/>
     <circle cx="50" cy="50" r="${r}" fill="none" stroke="${over ? '#ff6b6b' : color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(c * p).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)" class="ring-arc"/></svg>
     <div class="ring-in"><b>${label}</b><small>${sub}</small></div></div>`;
 }

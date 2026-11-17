@@ -112,7 +112,7 @@ ACT['vid-own-save'] = b => {
 // Search: in the app through your Google account (Media add-on), otherwise on YouTube itself
 ACT['vid-find'] = async b => {
   const ex = lib(b.dataset.id), q = ex.name + ' proper form tutorial', box = $('#vidFind');
-  if (!mediaReady()) { box.innerHTML = `<div class="muted xs" style="margin-top:10px">In-app search needs the Media add-on (Settings). Meanwhile: <a style="color:var(--acc)" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}">search on YouTube ↗</a>, copy a link, then tap "Use my own link".</div>`; return; }
+  if (!mediaReady()) { box.innerHTML = `<div class="muted xs" style="margin-top:10px">In-app search needs the Media add-on (Settings). Meanwhile: <a style="color:var(--accText)" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}">search on YouTube ↗</a>, copy a link, then tap "Use my own link".</div>`; return; }
   box.innerHTML = `<div style="margin-top:10px">${skeleton(3)}</div>`;
   try {
     const { items } = await media('ytSearch', { q });

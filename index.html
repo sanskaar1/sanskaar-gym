@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0d10">
+<meta name="theme-color" content="#F4F0EA">
+<script>try{var t=(JSON.parse(localStorage.getItem('forge.v1'))||{}).settings.theme}catch(e){}document.documentElement.dataset.theme=t==='dark'?'dark':'light'</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,52 +15,53 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=202611171138">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css?v=202611171310">
 </head>
 <body>
 <div class="top"><div class="wrap"><div class="brand">Sanskaar <b>GYM</b></div><div class="top-r"><button class="sync-pill" data-a="go-settings" id="syncPill"></button><button class="gear" data-a="go-settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div></div></div>
 <main class="wrap" id="view"></main>
 
-<div class="restbar hidden" id="restbar">
+<div class="restbar glass hidden" id="restbar">
   <div class="rb-fill" id="rbFill"></div>
-  <button class="btn sm" data-a="rest-sub">−15</button>
   <div class="rb-time"><small>Rest</small><span id="rbTime">0:00</span></div>
-  <button class="btn sm" data-a="rest-add">+15</button>
+  <button class="btn sm" data-a="rest-sub" aria-label="15 seconds less">−15</button>
+  <button class="btn sm" data-a="rest-add" aria-label="15 seconds more">+15</button>
   <button class="btn sm acc" data-a="rest-skip">Skip</button>
 </div>
+<button class="resume glass hidden" id="resume" data-a="resume"><i class="rdot"></i><span class="grow"><b class="ellip" id="rsName"></b><small id="rsTime"></small></span><span class="btn sm acc">Resume</span></button>
 
-<nav class="tabs"><div class="in-nav" id="nav"></div></nav>
+<nav class="tabs"><div class="nav-pill glass"><span class="lens off" id="lens"></span><div class="in-nav" id="nav"></div></div></nav>
 <div class="scrim" id="scrim" data-a="close"></div>
 <div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="importFile" accept="application/json" hidden>
 
-<script src="vendor/chart.umd.min.js?v=202611171138"></script>
-<script src="js/util.js?v=202611171138"></script>
-<script src="js/videos.js?v=202611171138"></script>
-<script src="js/exdb.js?v=202611171138"></script>
-<script src="js/records.js?v=202611171138"></script>
-<script src="js/db.js?v=202611171138"></script>
-<script src="js/store.js?v=202611171138"></script>
-<script src="js/analytics.js?v=202611171138"></script>
-<script src="js/ui.js?v=202611171138"></script>
-<script src="js/calc.js?v=202611171138"></script>
-<script src="js/views.js?v=202611171138"></script>
-<script src="js/train.js?v=202611171138"></script>
-<script src="js/library.js?v=202611171138"></script>
-<script src="js/body.js?v=202611171138"></script>
-<script src="js/muscles.js?v=202611171138"></script>
-<script src="js/coach.js?v=202611171138"></script>
-<script src="js/nutrition.js?v=202611171138"></script>
-<script src="js/recovery.js?v=202611171138"></script>
-<script src="js/reports.js?v=202611171138"></script>
-<script src="js/screens.js?v=202611171138"></script>
-<script src="js/overlays.js?v=202611171138"></script>
-<script src="js/sync.js?v=202611171138"></script>
-<script src="js/media.js?v=202611171138"></script>
-<script src="js/actions.js?v=202611171138"></script>
-<script src="js/viewport.js?v=202611171138"></script>
-<script src="js/main.js?v=202611171138"></script>
+<script src="vendor/chart.umd.min.js?v=202611171310"></script>
+<script src="js/util.js?v=202611171310"></script>
+<script src="js/videos.js?v=202611171310"></script>
+<script src="js/exdb.js?v=202611171310"></script>
+<script src="js/records.js?v=202611171310"></script>
+<script src="js/db.js?v=202611171310"></script>
+<script src="js/store.js?v=202611171310"></script>
+<script src="js/analytics.js?v=202611171310"></script>
+<script src="js/ui.js?v=202611171310"></script>
+<script src="js/calc.js?v=202611171310"></script>
+<script src="js/views.js?v=202611171310"></script>
+<script src="js/train.js?v=202611171310"></script>
+<script src="js/library.js?v=202611171310"></script>
+<script src="js/body.js?v=202611171310"></script>
+<script src="js/muscles.js?v=202611171310"></script>
+<script src="js/coach.js?v=202611171310"></script>
+<script src="js/nutrition.js?v=202611171310"></script>
+<script src="js/recovery.js?v=202611171310"></script>
+<script src="js/reports.js?v=202611171310"></script>
+<script src="js/screens.js?v=202611171310"></script>
+<script src="js/overlays.js?v=202611171310"></script>
+<script src="js/sync.js?v=202611171310"></script>
+<script src="js/media.js?v=202611171310"></script>
+<script src="js/actions.js?v=202611171310"></script>
+<script src="js/viewport.js?v=202611171310"></script>
+<script src="js/main.js?v=202611171310"></script>
 </body>
 </html>

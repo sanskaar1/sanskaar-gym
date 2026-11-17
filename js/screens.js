@@ -1,15 +1,21 @@
 'use strict';
 /* ---------- Analytics and Profile tabs ---------- */
-const ANALYTICS = [['progress', 'Progress'], ['body', 'Body'], ['muscles', 'Muscles'], ['recovery', 'Recovery'], ['reports', 'Reports'], ['coach', 'Coach']];
+const ANALYTICS = [['progress', 'Progress'], ['body', 'Body'], ['recovery', 'Recovery']];
+const ANALYTICS_SUB = { muscles: 'Muscles', coach: 'Coach' }; // opened from Progress and Home, with a back button
 function viewAnalytics() {
-  const views = { progress: viewProgress, body: viewBody, muscles: viewMuscles, recovery: viewRecovery, reports: viewReports, coach: viewCoach };
-  return `${segBar(ANALYTICS, ui.seg, 'seg', 'scroll top-seg')}<div class="fade-in">${(views[ui.seg] || viewProgress)()}</div>`;
+  if (ui.seg === 'reports') ui.seg = 'progress'; // reports are part of Progress now
+  const views = { progress: viewProgress, body: viewBody, muscles: viewMuscles, recovery: viewRecovery, coach: viewCoach }, sub = ANALYTICS_SUB[ui.seg];
+  return `${sub ? `<div class="page-h" style="margin-bottom:14px"><button class="icon" data-a="seg" data-v="progress" aria-label="Back to Progress">${IC.back}</button><h3>${sub}</h3></div>` : segBar(ANALYTICS, ui.seg, 'seg', 'top-seg')}<div class="fade-in">${(views[ui.seg] || viewProgress)()}</div>`;
 }
 ACT['seg'] = b => { ui.seg = b.dataset.v; ui.muscle = ''; render(); scrollTo(0, 0); };
+ACT['go-muscles'] = () => { tab = 'analytics'; ui.seg = 'muscles'; render(); scrollTo(0, 0); };
+ACT['go-coach'] = () => { tab = 'analytics'; ui.seg = 'coach'; render(); scrollTo(0, 0); };
 
 function viewProgress() {
   const ws = sorted();
-  if (!ws.length) return emptyCard('No workouts yet', 'Finish your first workout and your progress charts appear here.');
+  if (!ws.length) return `<div class="card empty-state"><div class="prev-bars" aria-hidden="true">${[38, 62, 50, 84, 70, 100, 90].map((h, i) => `<i class="${i === 5 ? 'hi' : ''}" style="height:${h}%"></i>`).join('')}</div>
+    <div class="es-t">Your progress shows up here</div><div class="es-s">Finish your first workout and this fills in on its own: weekly volume, consistency, your training calendar and personal records.</div>
+    <button class="btn acc lg block" data-a="tab" data-t="workout" style="margin-top:18px">Start a workout</button></div>`;
   const now = Date.now(), wk = startOfWeek(now);
   const total = ws.reduce((a, w) => a + wVolume(w), 0), avgMin = ws.reduce((a, w) => a + (w.end - w.start), 0) / ws.length / 6e4;
   const labels = [], vols = [];
@@ -17,15 +23,13 @@ function viewProgress() {
   const used = [...new Set(ws.flatMap(w => w.exercises.map(e => e.exId)))];
   if (!used.includes(progEx)) progEx = used[0];
   const hist = exerciseHistory(S.workouts, progEx), rec = personalRecords(S.workouts)[progEx];
-  return `<div class="tiles" style="margin-top:0">
-      <div class="tile"><div class="v">${ws.length}</div><div class="l">Workouts</div></div>
-      <div class="tile"><div class="v">${fmtN(total)}</div><div class="l">Total ${unit()} lifted</div></div>
-      <div class="tile"><div class="v">${Math.round(avgMin)}<span class="sm muted">m</span></div><div class="l">Avg duration</div></div></div>
-    <h2>Weekly volume</h2><div class="card">${barChart2(labels, [{ data: vols, backgroundColor: vols.map((_, i) => i === vols.length - 1 ? '#ffd60a' : '#3a404a') }], { fmt: v => fmtN(v) + ' ' + unit() })}<div class="muted xs">Weight × reps of working sets (warm-ups excluded).</div></div>
+  return `${viewReports()}
+    <h2>Weekly volume</h2><div class="card">${barChart2(labels, [{ data: vols, backgroundColor: vols.map((_, i) => i === vols.length - 1 ? ACC() : cssVar('--track')) }], { fmt: v => fmtN(v) + ' ' + unit() })}<div class="muted xs">Weight × reps of working sets (warm-ups excluded).</div></div>
     <h2>Strength — estimated 1-rep max</h2><div class="card">
       <select class="in" data-prog-ex>${used.map(id => `<option value="${id}" ${id === progEx ? 'selected' : ''}>${esc(lib(id).name)}</option>`).join('')}</select>
       ${rec ? `<div class="row between sm" style="margin-top:12px"><span class="muted">Best set</span><b>${rec.e1Set.w} ${unit()} × ${rec.e1Set.r} <span class="muted" style="font-weight:400">· ${short(rec.e1At)}</span></b></div>` : ''}
-      ${hist.length > 1 ? lineChart2(hist.map(h => ({ x: h.t, y: h.e1 })), '#ffd60a', v => round1(v) + ' ' + unit()) : '<div class="empty sm">Do this exercise twice to see a trend.</div>'}</div>
+      ${hist.length > 1 ? lineChart2(hist.map(h => ({ x: h.t, y: h.e1 })), ACC(), v => round1(v) + ' ' + unit()) : '<div class="empty sm">Do this exercise twice to see a trend.</div>'}</div>
+    <h2>More</h2><div class="group">${srow('target', 'Muscles', 'What you trained and what needs more work', IC.chev, 'go-muscles')}${srow('spark', 'Coach', 'Progress, stalls and suggestions for your plans', IC.chev, 'go-coach')}</div>
     <h2>History</h2><div class="card" style="padding:2px 14px">${ws.map(w => `
       <details class="w"><summary><div><div class="t" style="font-weight:600">${esc(w.name)}</div><div class="muted xs">${nice(w.start)} · ${Math.round((w.end - w.start) / 6e4)} min · ${fmtN(wVolume(w))} ${unit()}</div></div><span class="muted xs">${connected() && !isPending('workouts', w.id) ? '✓ sheet' : ''}</span></summary>
         <div class="wd">${compareHTML(w)}
@@ -44,8 +48,6 @@ function viewProfile() {
     <div class="group">
       ${srow('camera', 'Transformation photos', `${S.photos.length} photo${S.photos.length === 1 ? '' : 's'} · before/after`, IC.chev, 'go-photos')}
       ${srow('target', 'Goals & achievements', `${S.goals.filter(g => !g.doneAt).length} active goals · ${awards} awards`, IC.chev, 'go-goals')}
-      ${srow('heart', 'Recovery check-in', 'Sleep, energy, soreness', IC.chev, 'go-recovery')}
-      ${srow('table', 'Reports', 'Weekly, monthly, yearly · share or PDF', IC.chev, 'go-reports')}
     </div>
     <div class="group">${srow('settings', 'Settings', 'Units, rest timer, equipment, Sheet, backups', IC.chev, 'go-settings')}</div>`;
 }

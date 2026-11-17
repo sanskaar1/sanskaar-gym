@@ -5,7 +5,7 @@
  *  2. a moment later stores each changed record in IndexedDB and queues it for the Google Sheet.
  * IndexedDB is the main copy. Nothing is ever deleted from it without a backup first.
  */
-const APP_VERSION = 9;
+const APP_VERSION = 10;
 const KEY = 'forge.v1';
 function seed() {
   const lib = [
@@ -21,7 +21,7 @@ function seed() {
   const by = n => lib.find(e => e.name === n).id;
   const P = (name, list) => ({ id: uid(), name, items: list.map(([n, s, r]) => ({ exId: by(n), sets: s, reps: r })) });
   return {
-    settings: { unit: 'kg', rest: 90, height: '', sheetUrl: '', autoSync: true, lastSync: 0,
+    settings: { theme: 'light', unit: 'kg', rest: 90, height: '', sheetUrl: '', autoSync: true, lastSync: 0,
       bar: 20, plates: '25,20,15,10,5,2.5,1.25', weeklyGoal: 4, equipment: EQUIPMENT.slice(),
       targets: { kcal: '', p: '', c: '', f: '', water: 2500 } },
     library: lib,

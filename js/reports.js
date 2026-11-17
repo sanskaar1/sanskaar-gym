@@ -35,12 +35,13 @@ function viewReports() {
       ${r.weight || r.bf || r.waist ? `<h2 style="margin:14px 2px 6px">Body</h2><div class="chips">${[['weight', 'Weight', unit()], ['bf', 'Body fat', '%'], ['waist', 'Waist', lenUnit()]].filter(([k]) => r[k]).map(([k, l, u]) => `<span class="chip">${l} ${r[k].start}→${r[k].current}${u === '%' ? '%' : ' ' + u} (${signedN(r[k].change)})</span>`).join('')}</div>` : ''}
       ${r.kcal != null || r.sleep != null ? `<h2 style="margin:14px 2px 6px">Food & recovery</h2><div class="chips">${r.kcal != null ? `<span class="chip">${r.kcal.toLocaleString()} kcal/day</span><span class="chip">${r.protein} g protein/day</span><span class="chip">${r.foodDays} days logged</span>` : ''}${r.sleep != null ? `<span class="chip">${r.sleep} h sleep</span>` : ''}${r.fatigue != null ? `<span class="chip">Energy: ${FATIGUE[Math.round(r.fatigue)]}</span>` : ''}</div>` : ''}
     </section>
-    <div class="row gap"><button class="btn" style="flex:1" data-a="share-img">Share as image</button><button class="btn" style="flex:1" data-a="share-pdf">Save PDF</button></div>
-    <h2>Consistency</h2><section class="card"><div class="row" style="gap:16px;align-items:center">${ring(score, 100, score >= 80 ? '#69db7c' : score >= 50 ? '#ffd60a' : '#ff8787', score + '%', 'score', 92)}
+    <button class="btn block" data-a="report-export" style="margin-top:0">Export this report</button>
+    <h2>Consistency</h2><section class="card"><div class="row" style="gap:16px;align-items:center">${ring(score, 100, score >= 80 ? '#69db7c' : score >= 50 ? ACC() : '#ff8787', score + '%', 'score', 92)}
       <div class="grow sm">How often you hit your goal of <b>${S.settings.weeklyGoal}</b> workouts a week over the last 8 finished weeks (a week with ${Math.ceil(S.settings.weeklyGoal / 2)} of ${S.settings.weeklyGoal} counts as half).<div class="muted xs" style="margin-top:6px">Current streak: <b>${streak}</b> week${streak === 1 ? '' : 's'} in a row with a workout.</div></div></div></section>
     <h2>Training calendar</h2>${calendar(ui.rPeriod === 'month' ? ui.rOffset : 0, now)}
     <h2>Personal records</h2>${recordsList()}`;
 }
+ACT['report-export'] = () => openSheet(`<div class="sheet-h"><h3>Export this report</h3><button class="icon" data-a="close">${IC.x}</button></div><div class="row gap"><button class="btn acc" style="flex:1" data-a="share-img">Share as image</button><button class="btn" style="flex:1" data-a="share-pdf">Save PDF</button></div>`);
 ACT['rperiod'] = b => { ui.rPeriod = b.dataset.v; ui.rOffset = 0; render(); };
 ACT['roff'] = b => { ui.rOffset = Math.min(0, ui.rOffset + +b.dataset.d); render(); };
 
@@ -51,7 +52,7 @@ function calendar(offset, now) {
   for (let i = 0; i < days; i++) { const k = ymd(from + i * DAY + 12 * 36e5); cells.push(`<span class="cd ${wDays.has(k) ? 'w' : rest.has(k) ? 'r' : ''} ${k === ymd(now) ? 'today' : ''}">${i + 1}</span>`); }
   return `<section class="card"><div class="row between sm"><b>${monthName(from)}</b><span class="muted xs">${S.workouts.filter(w => w.start >= from && w.start < to).length} workouts</span></div>
     <div class="cal">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<i>${d}</i>`).join('')}${cells.join('')}</div>
-    <div class="legend" style="justify-content:flex-start"><span><i style="background:#ffd60a"></i>Workout</span><span><i style="background:#3b4a5e"></i>Rest day</span></div></section>`;
+    <div class="legend" style="justify-content:flex-start"><span><i style="background:var(--acc)"></i>Workout</span><span><i style="background:var(--track)"></i>Rest day</span></div></section>`;
 }
 function recordsList() {
   const rec = Object.values(personalRecords(S.workouts)).filter(r => r.e1 > 0).sort((a, b) => b.e1 - a.e1);
@@ -136,7 +137,7 @@ function viewGoals() {
     ${S.goals.length ? S.goals.map(g => { const p = goalProgress(g), m = GOAL_METRICS().find(x => x[0] === g.metric);
       const title = g.type === 'body' ? `${m?.[1]} → ${g.target}${m?.[2] === '%' ? '%' : ' ' + m?.[2]}` : g.type === 'strength' ? `${lib(g.exId).name}: ${g.weight} ${unit()} × ${g.reps}` : `${g.perWeek} workouts every week`;
       return `<section class="card goal ${g.doneAt ? 'done' : ''}"><div class="row between"><div class="t">${g.doneAt ? '✅ ' : ''}${esc(title)}</div><button class="icon sm" data-a="goal-del" data-id="${g.id}" aria-label="Delete goal">${IC.x}</button></div>
-        ${bar(p.pct * 100, 100, g.doneAt ? '#69db7c' : '#ffd60a')}<div class="row between xs muted" style="margin-top:6px"><span>${esc(p.txt)}</span><span>${Math.round(p.pct * 100)}%${g.by ? ' · by ' + shortDate(fromKey(g.by)) : ''}</span></div></section>`; }).join('')
+        ${bar(p.pct * 100, 100, g.doneAt ? '#69db7c' : ACC())}<div class="row between xs muted" style="margin-top:6px"><span>${esc(p.txt)}</span><span>${Math.round(p.pct * 100)}%${g.by ? ' · by ' + shortDate(fromKey(g.by)) : ''}</span></div></section>`; }).join('')
       : emptyCard('No goals yet', 'Set a body goal (weight, waist…), a strength goal (e.g. bench 100 kg × 5) or a weekly workout goal.')}
     <h2>Achievements · ${earned.length}/${AWARDS.length}</h2><div class="awards">${AWARDS.map(([id, icon, name]) => { const at = S.settings.awards?.[id]; return `<div class="aw ${at ? 'on' : ''}"><span>${at ? icon : '🔒'}</span><b>${name}</b><small>${at ? shortDate(at) : 'Locked'}</small></div>`; }).join('')}</div>`;
 }
