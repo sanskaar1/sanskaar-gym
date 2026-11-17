@@ -9,8 +9,8 @@ function viewPlans() {
   ${S.plans.map(p => {
     const open = !!ui.planOpen[p.id];
     return `<section class="card plan2 ${open ? 'open' : ''}">
-      <div class="plan-top"><button class="grow plan-tog" data-a="plan-toggle" data-id="${p.id}" aria-expanded="${open}">
-          <div class="nm">${esc(p.name)}</div><div class="muted sm">${p.items.length} exercises · ${p.items.reduce((a, i) => a + (+i.sets || 0), 0)} sets</div></button>
+      <div class="plan-top"><span class="badge ${open ? 'acc' : ''}" aria-hidden="true">${planBadge(p)}</span><button class="grow plan-tog" data-a="plan-toggle" data-id="${p.id}" aria-expanded="${open}" aria-label="${esc(p.name)}">
+          <div class="nm">${esc(planTitle(p))}</div><div class="muted sm">${p.items.length} exercises · ${p.items.reduce((a, i) => a + (+i.sets || 0), 0)} sets</div></button>
         <button class="btn sm" data-a="plan-edit" data-id="${p.id}">Edit</button><button class="btn sm acc" data-a="start" data-id="${p.id}">Start</button></div>
       ${open ? `<div class="pex">${p.items.map((it, k) => { const ex = lib(it.exId), v = vidOf(ex); return `
         <button class="pex-row" data-a="ex-info" data-id="${ex.id}">
@@ -35,9 +35,11 @@ function viewLibrary() {
   <div class="chips scroll" style="margin-top:6px">${eqs.map(m => `<button class="chip btnchip ${m === ui.libE ? 'on' : ''}" data-a="lib-e" data-v="${m}">${m === 'All' ? 'Any equipment' : m}</button>`).join('')}</div>
   <div class="card" style="padding:4px 12px;margin-top:10px" id="libList">${libRows(list)}</div>`;
 }
+const levelMeter = level => { if (!level) return ''; const n = ['beginner', 'intermediate', 'advanced'].indexOf(String(level).toLowerCase()) + 1;
+  return `<span class="lvlrow">${n ? `<span class="lvl" aria-hidden="true">${[1, 2, 3].map(k => `<i class="${k <= n ? 'on' : ''}"></i>`).join('')}</span>` : ''}${esc(level)}</span>`; };
 const libRows = list => list.map(e => { const v = vidOf(e); return `<button class="li pick" data-a="ex-info" data-id="${e.id}">
     ${v ? `<span class="thumb"><img src="${ytThumb(v.id)}" alt="" loading="lazy">${IC.play}</span>` : `<span class="thumb none">${IC.play}</span>`}
-    <span class="grow" style="min-width:0"><span class="t ellip">${esc(e.name)}</span><br><span class="muted xs">${esc(musclesOf(e).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || e.muscle)}${e.equipment ? ' · ' + e.equipment : ''}${e.level ? ' · ' + e.level : ''}</span></span></button>`; }).join('') || '<div class="empty">No exercise matches.</div>';
+    <span class="grow" style="min-width:0"><span class="t ellip">${esc(e.name)}</span><br><span class="muted xs">${esc(musclesOf(e).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || e.muscle)}${e.equipment ? ' · ' + e.equipment : ''}</span>${levelMeter(e.level)}</span></button>`; }).join('') || '<div class="empty">No exercise matches.</div>';
 ACT['lib-m'] = b => { ui.libM = b.dataset.v; render(); };
 ACT['lib-e'] = b => { ui.libE = b.dataset.v; render(); };
 CHG['libq'] = t => { ui.libQ = t.value; const q = t.value.toLowerCase(); const el = $('#libList'); if (el) el.innerHTML = libRows(S.library.filter(e => e.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name))); };
