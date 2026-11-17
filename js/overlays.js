@@ -47,7 +47,7 @@ function openExEdit(id) {
     <label class="f">Name<input class="in" id="exn" value="${esc(ex.name)}" placeholder="e.g. Cable Lateral Raise"></label>
     <label class="f">Muscle group<select class="in" id="exm">${MUSCLES.map(m => `<option ${m === ex.muscle ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
     <label class="f">YouTube reference video<input class="in" id="exv" value="${esc(ex.video)}" placeholder="https://youtube.com/watch?v=…"></label>
-    <a class="sm" style="display:inline-block;margin-top:8px;color:var(--acc)" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent((ex.name || 'gym exercise') + ' proper form tutorial')}">Find a video on YouTube ↗</a>
+    <a class="sm" style="display:inline-block;margin-top:8px;color:var(--accText)" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent((ex.name || 'gym exercise') + ' proper form tutorial')}">Find a video on YouTube ↗</a>
     ${ytId(ex.video) ? `<div class="frame" style="margin-top:12px"><iframe src="https://www.youtube-nocookie.com/embed/${ytId(ex.video)}?rel=0&playsinline=1" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>` : ''}
     <button class="btn acc block" data-a="ex-save" data-id="${ex.id}">Save</button>
     ${id ? `<button class="btn danger block" data-a="ex-del" data-id="${ex.id}">Delete from library</button>` : ''}`);
@@ -95,6 +95,7 @@ function startRest(sec) { rest = { end: Date.now() + sec * 1000, total: sec }; $
 function stopRest() { rest = null; $('#restbar').classList.add('hidden'); }
 function tick() {
   const el = $('#elapsed'); if (el && S.active) el.textContent = fmtDur(Date.now() - S.active.start);
+  updateResume();
   if (rest) {
     const left = rest.end - Date.now();
     if (left <= 0) { stopRest(); beep(); navigator.vibrate && navigator.vibrate([200, 100, 200]); toast('Rest over — next set!'); return; }

@@ -8,6 +8,8 @@ document.addEventListener('click', ev => {
     case 'go-settings': if (tab !== 'settings') backTab = tab; tab = 'settings'; render(); scrollTo(0, 0); break;
     case 'back': tab = backTab; render(); scrollTo(0, 0); break;
     case 'unit': S.settings.unit = b.dataset.v; save(); render(); break;
+    case 'theme': S.settings.theme = b.dataset.v; save(); haptic(); render(); break;
+    case 'resume': tab = 'workout'; editPlanId = null; render(); scrollTo(0, 0); break;
     case 'rest-step': S.settings.rest = Math.min(600, Math.max(15, (+S.settings.rest || 90) + +b.dataset.d)); save(); render(); break;
     case 'close': closeSheet(); break;
     case 'ask-ok': { const f = askFn; askFn = null; closeSheet(); f && f(); break; }
@@ -16,8 +18,8 @@ document.addEventListener('click', ev => {
     case 'discard': ask('Discard this workout? Nothing will be saved.', 'Discard', () => { S.active = null; stopRest(); keepAwake(false); save(); render(); }); break;
     case 'set-add': { const e = A.exercises[i], last = e.sets[e.sets.length - 1]; e.sets.push({ w: last ? last.w : '', r: last ? last.r : '', done: false }); save(); render(); break; }
     case 'set-rm': A.exercises[i].sets.pop(); save(); render(); break;
-    case 'ex-rm': ask(`Remove ${lib(A.exercises[i].exId).name} from this workout?`, 'Remove', () => { A.exercises.splice(i, 1); save(); render(); }); break;
-    case 'ex-up': [A.exercises[i - 1], A.exercises[i]] = [A.exercises[i], A.exercises[i - 1]]; save(); render(); break;
+    case 'ex-rm': ask(`Remove ${lib(A.exercises[i].exId).name} from this workout?`, 'Remove', () => { A.exercises.splice(i, 1); ui.openEx = null; save(); render(); }); break;
+    case 'ex-up': [A.exercises[i - 1], A.exercises[i]] = [A.exercises[i], A.exercises[i - 1]]; ui.openEx = i - 1; save(); closeSheet(); render(); break;
     case 'vid': A.exercises[i].showVid = !A.exercises[i].showVid; save(); render(); break;
     case 'rest-add': if (rest) { rest.end += 15000; rest.total += 15; tick(); } break;
     case 'rest-sub': if (rest) { rest.end -= 15000; tick(); } break;

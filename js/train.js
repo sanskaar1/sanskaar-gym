@@ -13,20 +13,40 @@ function groupInfo(list, i) {
   return { first: a, last: b, size: b - a + 1, label: b - a + 1 >= 3 ? 'Giant set' : 'Superset', pos: i - a + 1 };
 }
 
+// One exercise is open for logging; the others wait in a short queue. Tapping one opens it.
+function openIndex() {
+  const A = S.active, L = A.exercises;
+  if (ui.openFor !== A.id) { ui.openFor = A.id; ui.openEx = null; }
+  if (ui.openEx != null && ui.openEx < L.length) return ui.openEx;
+  const todo = L.findIndex(e => !e.sets.length || e.sets.some(s => !s.done));
+  return todo < 0 ? 0 : todo;
+}
 function viewActive() {
-  const A = S.active;
+  const A = S.active, L = A.exercises, cur = openIndex(), cg = L.length ? groupInfo(L, cur) : null;
+  const isOpen = i => i === cur || (cg && i >= cg.first && i <= cg.last); // a superset opens together
+  const complete = e => e.sets.length && e.sets.every(s => s.done);
   return `
-  <div class="row between gap" style="margin:6px 0 14px">
+  <div class="row between gap" style="margin:6px 0 12px">
     <div style="flex:1;min-width:0">
       <input class="title-in" data-act-name value="${esc(A.name)}" aria-label="Workout name">
       <div class="live"><i></i><span id="elapsed">${fmtDur(Date.now() - A.start)}</span> · <span id="wsum">${summaryText()}</span></div>
     </div>
-    <button class="btn acc" data-a="finish">Finish</button>
+    <button class="icon" data-a="wk-menu" aria-label="Workout options">${IC.more}</button>
   </div>
-  ${A.exercises.length ? A.exercises.map(exCard).join('') : emptyCard('No exercises yet', 'Add your first one below.')}
+  ${L.length > 1 ? `<div class="exprog" style="grid-template-columns:repeat(${L.length},1fr)" aria-hidden="true">${L.map((e, i) => `<i class="${complete(e) ? 'on' : isOpen(i) ? 'cur' : ''}"></i>`).join('')}</div>` : ''}
+  ${L.length ? L.map((e, i) => isOpen(i) ? exCard(e, i) : exMini(e, i)).join('') : emptyCard('No exercises yet', 'Add your first one below.')}
   <button class="btn block" data-a="pick" data-mode="workout">+ Add exercise</button>
-  <button class="btn danger block" data-a="discard">Discard workout</button>`;
+  <button class="btn acc lg block" data-a="finish">Finish workout</button>`;
 }
+function exMini(e, i) {
+  const ex = lib(e.exId), done = e.sets.filter(s => s.done).length, all = e.sets.length && done === e.sets.length;
+  return `<button class="card ex-mini" data-a="ex-open" data-i="${i}"><span class="n ${all ? 'ok' : ''}">${all ? IC.check : i + 1}</span>
+    <span class="grow"><span class="ellip" style="display:block;font-weight:600">${esc(ex.name)}</span>
+      <span class="muted xs ellip" style="display:block">${esc(musclesOf(ex).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || ex.muscle)} · ${done}/${e.sets.length} sets${e.target ? ` · target ${esc(e.target)}` : ''}</span></span>${IC.chev}</button>`;
+}
+ACT['ex-open'] = b => { ui.openEx = +b.dataset.i; render(); };
+ACT['wk-menu'] = () => openSheet(`<div class="sheet-h"><h3>${esc(S.active.name || 'Workout')}</h3><button class="icon" data-a="close">${IC.x}</button></div>
+  <div class="group"><button class="srow" data-a="discard"><div class="grow"><div class="t" style="color:var(--red)">Discard workout</div><div class="s">Nothing from this session is saved</div></div>${IC.chev}</button></div>`);
 function summaryText() {
   const A = S.active; let n = 0, v = 0;
   A.exercises.forEach(e => e.sets.forEach(s => { if (s.done && s.t !== 'w') { n++; v += num(s.w) * num(s.r); } }));
@@ -79,6 +99,8 @@ ACT['done'] = b => {
     const g = groupInfo(A.exercises, i);
     if (!g || i === g.last) startRest(s.t === 'w' ? Math.min(60, +S.settings.rest || 90) : +S.settings.rest || 90);
     livePR(e, s);
+    // When an exercise is finished, open the next one that still has sets to do
+    if (e.sets.every(x => x.done)) { const n = A.exercises.findIndex((x, k) => k !== i && (!x.sets.length || x.sets.some(y => !y.done))); ui.openEx = n < 0 ? i : n; }
   }
   save(); render();
 };

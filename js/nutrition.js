@@ -57,7 +57,7 @@ function weekNutrition(key) {
   const avg = a => Math.round(a.reduce((x, y) => x + y, 0) / Math.max(1, logged));
   return `<h2>Last 7 days</h2><section class="card">
     <div class="tiles" style="margin-top:0"><div class="tile"><div class="v">${avg(kcal).toLocaleString()}</div><div class="l">Avg kcal</div></div><div class="tile"><div class="v">${avg(prot)} g</div><div class="l">Avg protein</div></div><div class="tile"><div class="v">${logged}/7</div><div class="l">Days logged</div></div></div>
-    ${barChart2(labels, [{ label: 'kcal', data: kcal, backgroundColor: kcal.map(v => t.kcal && v > t.kcal * 1.1 ? '#ff8787' : '#ffd60a') }], { h: 160, fmt: v => v.toLocaleString() })}
+    ${barChart2(labels, [{ label: 'kcal', data: kcal, backgroundColor: kcal.map(v => t.kcal && v > t.kcal * 1.1 ? '#ff8787' : ACC()) }], { h: 160, fmt: v => v.toLocaleString() })}
     <div class="muted xs">Averages count only days with food logged.</div></section>`;
 }
 ACT['day-step'] = b => { const k = ui.day || todayKey(), n = ymd(fromKey(k) + +b.dataset.d * DAY); if (n <= todayKey()) { ui.day = n === todayKey() ? '' : n; render(); } };

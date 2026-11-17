@@ -23,14 +23,14 @@ const BODY_BACK = [
   ['calves', 'M80 256h16l-2 52h-10zM104 256h16l-4 52h-10z'],
 ];
 const MAJOR = ['chest', 'lats', 'upper-back', 'front-delts', 'side-delts', 'rear-delts', 'biceps', 'triceps', 'quads', 'hamstrings', 'glutes', 'calves', 'abs'];
-const heat = n => !n ? '#2a2f37' : n < WEEKLY_SETS.low / 2 ? '#7a5a1e' : n < WEEKLY_SETS.low ? '#c08a1e' : n <= WEEKLY_SETS.high ? '#ffd60a' : '#ff9f43';
+const heat = n => !n ? 'var(--track)' : n < WEEKLY_SETS.low / 2 ? '#7a5a1e' : n < WEEKLY_SETS.low ? '#c08a1e' : n <= WEEKLY_SETS.high ? '#ffd60a' : '#ff9f43';
 
 function bodyMap(sets, sel) {
   const fig = (shapes, label) => `<svg viewBox="40 18 120 296" class="bmap" role="img" aria-label="${label} muscle map">
-    <ellipse cx="100" cy="36" rx="13" ry="15" fill="#2a2f37"/><text x="100" y="${18 + 292}" text-anchor="middle" fill="#5c636c" font-size="9" font-family="Inter,system-ui">${label}</text>
+    <ellipse cx="100" cy="36" rx="13" ry="15" fill="var(--track)"/><text x="100" y="${18 + 292}" text-anchor="middle" fill="var(--muted)" font-size="9" font-family="Inter,system-ui">${label}</text>
     ${shapes.map(([m, d]) => `<path d="${d}" fill="${heat(sets[m])}" class="${m === sel ? 'sel' : ''}" data-a="muscle" data-v="${m}"><title>${MUSCLE_INFO[m].name}: ${round1(sets[m] || 0)} sets</title></path>`).join('')}</svg>`;
   return `<div class="bmaps">${fig(BODY_FRONT, 'Front')}${fig(BODY_BACK, 'Back')}</div>
-    <div class="legend"><span><i style="background:#2a2f37"></i>0</span><span><i style="background:#7a5a1e"></i>&lt;5</span><span><i style="background:#c08a1e"></i>5–9</span><span><i style="background:#ffd60a"></i>10–20</span><span><i style="background:#ff9f43"></i>20+</span></div>`;
+    <div class="legend"><span><i style="background:var(--track)"></i>0</span><span><i style="background:#7a5a1e"></i>&lt;5</span><span><i style="background:#c08a1e"></i>5–9</span><span><i style="background:#ffd60a"></i>10–20</span><span><i style="background:#ff9f43"></i>20+</span></div>`;
 }
 
 function viewMuscles() {
@@ -70,10 +70,10 @@ function muscleDetail(m, last, freq, now) {
   for (let i = 7; i >= 0; i--) { const f = wk - i * WEEK; labels.push(shortDate(f)); data.push(round1(muscleSets(S.workouts, lib, f, f + WEEK)[m] || 0)); }
   const hist = sorted().flatMap(w => w.exercises.filter(e => workSets(e).length && (musclesOf(lib(e.exId)).primary.includes(m) || musclesOf(lib(e.exId)).secondary.includes(m))).map(e => ({ w, e }))).slice(0, 12);
   const r = recoveryEstimate(last[m], now);
-  return `<section class="card" style="border-color:#3a3f1a">
+  return `<section class="card" style="border-color:var(--acc)">
     <div class="row between"><h3 style="margin:0">${MUSCLE_INFO[m].name}</h3><button class="icon sm" data-a="muscle" data-v="" aria-label="Close">${IC.x}</button></div>
     <div class="tiles" style="margin-top:10px"><div class="tile"><div class="v">${data[7]}</div><div class="l">Sets this week</div></div><div class="tile"><div class="v">${freq[m] || 0}×</div><div class="l">Days / week</div></div><div class="tile"><div class="v sm2">${last[m] ? ago(last[m]) : '—'}</div><div class="l">${r.label}</div></div></div>
-    ${barChart2(labels, [{ data, backgroundColor: labels.map((_, k) => k === 7 ? '#ffd60a' : '#3a404a') }], { h: 150, fmt: v => v })}
+    ${barChart2(labels, [{ data, backgroundColor: labels.map((_, k) => k === 7 ? ACC() : cssVar('--track')) }], { h: 150, fmt: v => v })}
     <h2 style="margin:12px 2px 6px">History</h2>${hist.map(({ w, e }) => `<div class="li"><span class="grow"><span class="t">${esc(e.name)}</span><br><span class="muted xs">${nice(w.start)} · ${workSets(e).map(setTxt).join(', ')}</span></span></div>`).join('') || '<div class="empty">Not trained yet.</div>'}
   </section>`;
 }
