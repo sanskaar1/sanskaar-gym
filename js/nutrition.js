@@ -93,12 +93,23 @@ function foodResults() {
   const match = f => !q || f.name.toLowerCase().includes(q);
   const meals = S.meals.filter(m => match(m));
   const groups = [['Saved meals', meals.map(m => ({ ...m, isMeal: true }))], ['Recent', q ? [] : recent], ['My foods', mine.filter(match)], ['Common foods', TYPICAL_FOODS.filter(match)], ['Packaged foods', foodCtx.off || []]];
-  const html = groups.filter(([, l]) => l.length).map(([t, l]) => `<div class="xs muted gh2">${t}</div>${l.slice(0, 25).map((f, i) => f.isMeal
+  // One usual portion ("1 egg (50 g) · 78 kcal") when the food has a serving size, otherwise per 100 g
+  const line = f => { if (!(+f.serving > 0)) return `${f.kcal} kcal · P ${f.p} · C ${f.c} · F ${f.f} per 100 g`; const a = foodAmount(f, 1, 'serving'); return `1 ${esc(f.sname || 'serving')} (${f.serving} g) · ${a.kcal} kcal · P ${a.p} · C ${a.c} · F ${a.f}`; };
+  const prev = q ? [] : prevMeal();
+  const repeat = prev.length ? `<button class="li pick" data-a="meal-repeat"><span class="ic">${IC.reset}</span><span class="grow"><span class="t">Repeat ${(ui.day || todayKey()) === todayKey() ? "yesterday's" : "the day before's"} ${esc(foodCtx.meal.toLowerCase())}</span><br><span class="muted xs">${prev.length} item${prev.length === 1 ? '' : 's'} · ${dayTotals(prev).kcal} kcal</span></span><span class="chip">Add</span></button>` : '';
+  const html = repeat + groups.filter(([, l]) => l.length).map(([t, l]) => `<div class="xs muted gh2">${t}</div>${l.slice(0, 25).map((f, i) => f.isMeal
     ? `<button class="li pick" data-a="meal-use" data-id="${f.id}"><span class="grow"><span class="t">${esc(f.name)}</span><br><span class="muted xs">${f.items.length} items · ${dayTotals(f.items).kcal} kcal</span></span><span class="chip">Add</span></button>`
-    : `<button class="li pick" data-a="food-pick" data-g="${t}" data-i="${i}"><span class="grow" style="min-width:0"><span class="t ellip">${esc(f.name)}</span><br><span class="muted xs">${f.kcal} kcal · P ${f.p} · C ${f.c} · F ${f.f} per 100 g ${pill(SOURCE[f.src]?.[0] || '', SOURCE[f.src]?.[1] || '')}</span></span>${IC.chev}</button>`).join('')}`).join('');
+    : `<button class="li pick" data-a="food-pick" data-g="${t}" data-i="${i}"><span class="grow" style="min-width:0"><span class="t ellip">${esc(f.name)}</span><br><span class="muted xs">${line(f)} ${pill(SOURCE[f.src]?.[0] || '', SOURCE[f.src]?.[1] || '')}</span></span>${IC.chev}</button>`).join('')}`).join('');
   foodCtx.groups = Object.fromEntries(groups.map(([t, l]) => [t, l]));
   return html || `<div class="empty">No match. Try "Search packaged foods", or add it as your own food.</div>`;
 }
+// What was logged for this meal on the day before the one being viewed
+const prevMeal = () => { const k = ymd(fromKey(ui.day || todayKey()) - DAY); return S.food.filter(e => e.date === k && e.meal === foodCtx.meal); };
+ACT['meal-repeat'] = () => {
+  const items = prevMeal(); if (!items.length) return;
+  items.forEach(({ name, amount, qty, unit, kcal, p, c, f, src, per }) => S.food.push({ name, amount, qty, unit, kcal, p, c, f, src, per, id: uid(), date: ui.day || todayKey(), meal: foodCtx.meal, at: Date.now() }));
+  save(); closeSheet(); render(); haptic(); toast(`${items.length} item${items.length === 1 ? '' : 's'} added to ${foodCtx.meal}`);
+};
 CHG['fq'] = t => { foodCtx.q = t.value; $('#fres').innerHTML = foodResults(); };
 ACT['food-pick'] = b => openPortion(foodCtx.groups[b.dataset.g][+b.dataset.i]);
 function openPortion(f) {

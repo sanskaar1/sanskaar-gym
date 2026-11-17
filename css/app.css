@@ -393,3 +393,13 @@ nav.tabs button.on{color:var(--accInk)}
 .ex-mini .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--card2);font-weight:600;font-size:13px;flex:0 0 auto}
 .ex-mini .n.ok{background:var(--acc);color:var(--accInk)}.ex-mini .n svg{width:16px;height:16px}
 .prev-bars{height:110px;display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;margin-bottom:18px}.prev-bars i{border-radius:10px;background:var(--track)}.prev-bars i.hi{background:var(--acc)}
+/* v10.1: plan badges, difficulty meter, soreness bars, repeat-yesterday row */
+.plan-top .badge{width:44px;height:44px;border-radius:15px;background:var(--card2)}.plan-top .badge.acc{background:var(--acc)}
+.lvlrow{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11.5px;color:var(--mut2)}
+.lvl{display:inline-flex;gap:3px}.lvl i{width:6px;height:14px;border-radius:3px;background:var(--track)}.lvl i.on{background:var(--acc)}
+.sore{display:flex;gap:4px}.sore button{width:34px;height:44px;display:flex;align-items:center}
+.sore i{display:block;width:100%;height:14px;border-radius:7px;background:var(--track)}
+.sore .on.lv0 i{background:var(--faint)}.sore .on.lv1 i{background:#F9E39A}.sore .on.lv2 i{background:var(--acc)}.sore .on.lv3 i{background:#C98A00}
+[data-theme="dark"] .sore .on.lv1 i{background:#8A7426}[data-theme="dark"] .sore .on.lv3 i{background:#FFF0B8}
+.li .ic{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--accSoft);color:var(--accText);flex:0 0 auto}
+#fres .li .grow>br{display:none}#fres .li .grow>span{display:block}#fres .li .grow>.muted{margin-top:3px}
