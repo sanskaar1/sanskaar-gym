@@ -4,6 +4,7 @@ const vidOf = ex => { const id = ytId(ex.video); if (!id) return null; const kno
 
 function viewPlans() {
   if (editPlanId) return viewPlanEdit();
+  if (ui.plansView === 'library') return viewLibrary();
   return `<h2 style="margin-top:6px">Your plans</h2>
   <div class="muted xs" style="margin:-4px 2px 10px">Tap a plan to see every exercise with its demo video.</div>
   ${S.plans.map(p => {
@@ -19,7 +20,8 @@ function viewPlans() {
             <span class="muted xs ellip">${it.sets} × ${esc(it.reps)}${it.weight ? ` · next ${it.weight} ${unit()}` : ''}${v ? ' · ' + esc(v.channel || 'video') : ' · no video'}</span></span>${IC.chev}</button>`; }).join('') || '<div class="empty">No exercises yet.</div>'}</div>` : ''}
     </section>`; }).join('') || emptyCard('No plans yet', 'Create your first plan.')}
   <button class="btn block" data-a="plan-new">+ New plan</button>
-  ${viewLibrary()}`;
+  <button class="card linkrow" data-a="go-library" style="margin-top:12px"><span class="ic">${IC.plans}</span>
+    <span class="grow"><span style="display:block;font-weight:600">Exercise library</span><span class="muted sm" style="display:block">${S.library.length} exercises · add your own</span></span>${IC.chev}</button>`;
 }
 ACT['plan-toggle'] = b => { ui.planOpen[b.dataset.id] = !ui.planOpen[b.dataset.id]; render(); };
 
@@ -29,7 +31,7 @@ function viewLibrary() {
     && (ui.libE === 'All' || (e.equipment || '') === ui.libE) && (!q || e.name.toLowerCase().includes(q))).sort((a, b) => a.name.localeCompare(b.name));
   const groups = ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Glutes', 'Core', 'Cardio'];
   const eqs = ['All', ...new Set(S.library.map(e => e.equipment).filter(Boolean))];
-  return `<div class="row between"><h2>Exercise library</h2><button class="btn sm ghost" data-a="ex-new" style="margin-top:14px">+ Custom</button></div>
+  return `<div class="page-h" style="margin-bottom:12px"><button class="icon" data-a="lib-back" aria-label="Back to plans">${IC.back}</button><h3 class="grow">Exercise library</h3><button class="btn sm ghost" data-a="ex-new">+ Custom</button></div>
   <input class="in" placeholder="Search ${S.library.length} exercises" value="${esc(ui.libQ)}" data-c="libq" data-live="1" autocomplete="off">
   <div class="chips scroll">${groups.map(m => `<button class="chip btnchip ${m === ui.libM ? 'on' : ''}" data-a="lib-m" data-v="${m}">${m}</button>`).join('')}</div>
   <div class="chips scroll" style="margin-top:6px">${eqs.map(m => `<button class="chip btnchip ${m === ui.libE ? 'on' : ''}" data-a="lib-e" data-v="${m}">${m === 'All' ? 'Any equipment' : m}</button>`).join('')}</div>
@@ -40,6 +42,8 @@ const levelMeter = level => { if (!level) return ''; const n = ['beginner', 'int
 const libRows = list => list.map(e => { const v = vidOf(e); return `<button class="li pick" data-a="ex-info" data-id="${e.id}">
     ${v ? `<span class="thumb"><img src="${ytThumb(v.id)}" alt="" loading="lazy">${IC.play}</span>` : `<span class="thumb none">${IC.play}</span>`}
     <span class="grow" style="min-width:0"><span class="t ellip">${esc(e.name)}</span><br><span class="muted xs">${esc(musclesOf(e).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || e.muscle)}${e.equipment ? ' · ' + e.equipment : ''}</span>${levelMeter(e.level)}</span></button>`; }).join('') || '<div class="empty">No exercise matches.</div>';
+ACT['go-library'] = () => { ui.plansView = 'library'; render(); scrollTo(0, 0); };
+ACT['lib-back'] = () => { ui.plansView = ''; render(); scrollTo(0, 0); };
 ACT['lib-m'] = b => { ui.libM = b.dataset.v; render(); };
 ACT['lib-e'] = b => { ui.libE = b.dataset.v; render(); };
 CHG['libq'] = t => { ui.libQ = t.value; const q = t.value.toLowerCase(); const el = $('#libList'); if (el) el.innerHTML = libRows(S.library.filter(e => e.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name))); };

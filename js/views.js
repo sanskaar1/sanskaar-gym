@@ -16,6 +16,7 @@ function render() {
   const v = $('#view'), key = tab + '/' + ui.seg + '/' + ui.profile;
   v.innerHTML = (views[tab] || viewWorkout)();
   if (v.dataset.k !== key) { v.dataset.k = key; v.classList.remove('fade-in'); void v.offsetWidth; v.classList.add('fade-in'); }
+  $('#exportBtn').classList.toggle('hidden', !(tab === 'analytics' && ui.seg === 'progress' && S.workouts.length));
   mountCharts();
   const on = v.querySelector('.segbar.scroll .on'); // keep the chosen tab visible in a scrolling tab bar
   if (on) on.parentNode.scrollLeft = on.offsetLeft - (on.parentNode.clientWidth - on.offsetWidth) / 2;
@@ -23,7 +24,7 @@ function render() {
 
 // "Workout in progress" strip on the other tabs (the rest timer takes its place while resting)
 function updateResume() {
-  const el = $('#resume'), show = !!S.active && tab !== 'workout' && !rest;
+  const el = $('#resume'), show = !!S.active && (tab !== 'workout' || ui.wkHome) && !rest;
   el.classList.toggle('hidden', !show);
   if (show) { $('#rsName').textContent = S.active.name || 'Workout'; $('#rsTime').textContent = 'Workout in progress · ' + fmtDur(Date.now() - S.active.start); }
 }
@@ -51,7 +52,7 @@ function weekArc(ws, now, goal) {
       <div class="n">${n} of ${goal}</div><div class="s">${n >= goal ? 'Weekly goal reached' : `workouts · ${goal - n} to go`}</div></div></div>`;
 }
 function viewWorkout() {
-  if (S.active) return viewActive();
+  if (S.active && !ui.wkHome) return viewActive(); // the back arrow in a workout shows Home while the workout keeps running
   const ws = sorted(), now = Date.now(), goal = +S.settings.weeklyGoal || 4, streak = weekStreak(S.workouts, now);
   const hr = new Date().getHours(), greet = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
   const np = nextPlan(), last = ws[0], tip = ws.length ? coachInsights(now)[0] : null;
