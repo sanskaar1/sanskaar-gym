@@ -16,7 +16,7 @@ function viewPlans() {
         <button class="pex-row" data-a="ex-info" data-id="${ex.id}">
           ${v ? `<span class="thumb"><img src="${ytThumb(v.id)}" alt="" loading="lazy">${IC.play}</span>` : `<span class="thumb none">${IC.play}</span>`}
           <span class="grow" style="min-width:0"><span class="t ellip">${k + 1}. ${esc(ex.name)}</span>
-            <span class="muted xs ellip">${it.sets} × ${esc(it.reps)}${it.weight ? ` · next ${it.weight} ${unit()}` : ''}${v ? ' · ' + esc(v.channel || 'video') : ' · no video'}</span></span>${IC.chev}</button>`; }).join('') || '<div class="empty">No exercises yet.</div>'}</div>` : ''}
+            <span class="muted xs ellip">${it.sets} × ${esc(it.reps)}${it.weight ? ` · next ${it.weight} ${unit()}` : ''}${v ? ' · ' + esc(v.channel || 'video') : ' · no video'}</span></span></button>`; }).join('') || '<div class="empty">No exercises yet.</div>'}</div>` : ''}
     </section>`; }).join('') || emptyCard('No plans yet', 'Create your first plan.')}
   <button class="btn block" data-a="plan-new">+ New plan</button>
   ${viewLibrary()}`;
@@ -37,7 +37,7 @@ function viewLibrary() {
 }
 const libRows = list => list.map(e => { const v = vidOf(e); return `<button class="li pick" data-a="ex-info" data-id="${e.id}">
     ${v ? `<span class="thumb sm"><img src="${ytThumb(v.id)}" alt="" loading="lazy"></span>` : `<span class="thumb sm none">${IC.play}</span>`}
-    <span class="grow" style="min-width:0"><span class="t ellip">${esc(e.name)}</span><br><span class="muted xs">${esc(musclesOf(e).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || e.muscle)}${e.equipment ? ' · ' + e.equipment : ''}${e.level ? ' · ' + e.level : ''}</span></span>${IC.chev}</button>`; }).join('') || '<div class="empty">No exercise matches.</div>';
+    <span class="grow" style="min-width:0"><span class="t ellip">${esc(e.name)}</span><br><span class="muted xs">${esc(musclesOf(e).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || e.muscle)}${e.equipment ? ' · ' + e.equipment : ''}${e.level ? ' · ' + e.level : ''}</span></span></button>`; }).join('') || '<div class="empty">No exercise matches.</div>';
 ACT['lib-m'] = b => { ui.libM = b.dataset.v; render(); };
 ACT['lib-e'] = b => { ui.libE = b.dataset.v; render(); };
 CHG['libq'] = t => { ui.libQ = t.value; const q = t.value.toLowerCase(); const el = $('#libList'); if (el) el.innerHTML = libRows(S.library.filter(e => e.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name))); };

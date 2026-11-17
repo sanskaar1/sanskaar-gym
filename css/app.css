@@ -230,7 +230,7 @@ details.adv[open] summary svg{transform:rotate(90deg)}
 .bas-range{width:100%;margin-top:12px;accent-color:var(--acc)}
 .sbs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.sbs img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block}
 .plan2{padding:0;overflow:hidden}.plan-top{display:flex;align-items:center;gap:8px;padding:14px}
-.plan-tog{text-align:left;min-width:0}.plan-tog .nm{font-weight:700}
+.plan-tog{text-align:left;min-width:0;flex:1 1 auto}.plan-tog .nm{font-weight:700}
 .pex{border-top:1px solid var(--line);padding:4px 8px 8px}
 .pex-row{display:flex;align-items:center;gap:12px;width:100%;padding:8px 6px;border-radius:12px;text-align:left}
 .pex-row .t{display:block;font-weight:600;font-size:14px}.pex-row .chev{width:16px;height:16px;color:var(--muted);flex:0 0 auto}
@@ -289,3 +289,10 @@ pre.code{white-space:pre-wrap;word-break:break-all;background:var(--card2);borde
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .pex-row .ellip,.li .ellip{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mrow2 .row{gap:8px}
+/* v9.1: arrows never grow (Safari drew size-less SVGs full width); library rows = thumbnail + name + one detail line */
+svg.chev{width:14px;height:14px;flex:0 0 14px;color:var(--muted)}
+#libList .li .grow>.muted{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+#libList .li .grow>br{display:none}
+#libList .thumb.sm{width:72px;height:40px}
+:where(svg[viewBox="0 0 24 24"]){width:20px;height:20px;flex-shrink:0}
+.pex-row .grow,#libList .li .grow,.grow{flex:1 1 auto;min-width:0}
