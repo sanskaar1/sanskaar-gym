@@ -26,13 +26,12 @@ function viewActive() {
   const isOpen = i => i === cur || (cg && i >= cg.first && i <= cg.last); // a superset opens together
   const complete = e => e.sets.length && e.sets.every(s => s.done);
   return `
-  <div class="row between gap" style="margin:6px 0 12px">
-    <div style="flex:1;min-width:0">
-      <input class="title-in" data-act-name value="${esc(A.name)}" aria-label="Workout name">
-      <div class="live"><i></i><span id="elapsed">${fmtDur(Date.now() - A.start)}</span> · <span id="wsum">${summaryText()}</span></div>
-    </div>
+  <div class="row between gap" style="margin:2px 0 8px">
+    <button class="icon" data-a="wk-home" aria-label="Back to home (the workout keeps running)">${IC.back}</button>
+    <div class="live" style="margin:0"><i></i><span id="elapsed">${fmtDur(Date.now() - A.start)}</span> · <span id="wsum">${summaryText()}</span></div>
     <button class="icon" data-a="wk-menu" aria-label="Workout options">${IC.more}</button>
   </div>
+  <input class="title-in" data-act-name value="${esc(A.name)}" aria-label="Workout name" style="margin-bottom:12px">
   ${L.length > 1 ? `<div class="exprog" style="grid-template-columns:repeat(${L.length},1fr)" aria-hidden="true">${L.map((e, i) => `<i class="${complete(e) ? 'on' : isOpen(i) ? 'cur' : ''}"></i>`).join('')}</div>` : ''}
   ${L.length ? L.map((e, i) => isOpen(i) ? exCard(e, i) : exMini(e, i)).join('') : emptyCard('No exercises yet', 'Add your first one below.')}
   <button class="btn block" data-a="pick" data-mode="workout">+ Add exercise</button>
@@ -44,6 +43,7 @@ function exMini(e, i) {
     <span class="grow"><span class="ellip" style="display:block;font-weight:600">${esc(ex.name)}</span>
       <span class="muted xs ellip" style="display:block">${esc(musclesOf(ex).primary.map(m => MUSCLE_INFO[m]?.name).join(', ') || ex.muscle)} · ${done}/${e.sets.length} sets${e.target ? ` · target ${esc(e.target)}` : ''}</span></span>${IC.chev}</button>`;
 }
+ACT['wk-home'] = () => { ui.wkHome = true; render(); scrollTo(0, 0); };
 ACT['ex-open'] = b => { ui.openEx = +b.dataset.i; render(); };
 ACT['wk-menu'] = () => openSheet(`<div class="sheet-h"><h3>${esc(S.active.name || 'Workout')}</h3><button class="icon" data-a="close">${IC.x}</button></div>
   <div class="group"><button class="srow" data-a="discard"><div class="grow"><div class="t" style="color:var(--red)">Discard workout</div><div class="s">Nothing from this session is saved</div></div>${IC.chev}</button></div>`);

@@ -20,6 +20,12 @@ function reportData(kind, offset, now = Date.now()) {
     sleep: avg(days, 'sleep'), fatigue: avg(days, 'fatigue'), perWeek: round1(W.length / weeks) };
 }
 
+// Share of the weekly goal reached in each of the last 8 finished weeks, oldest first (same rule as consistencyScore)
+function weekFills(now) {
+  const goal = Math.max(1, +S.settings.weeklyGoal || 1), end = startOfWeek(now), out = [];
+  for (let i = 8; i >= 1; i--) { const from = end - i * WEEK; out.push(Math.min(1, S.workouts.filter(w => w.start >= from && w.start < from + WEEK).length / goal)); }
+  return out;
+}
 function viewReports() {
   const now = Date.now(), r = reportData(ui.rPeriod, ui.rOffset, now);
   const score = consistencyScore(S.workouts, S.settings.weeklyGoal, now), streak = weekStreak(S.workouts, now);
@@ -35,9 +41,9 @@ function viewReports() {
       ${r.weight || r.bf || r.waist ? `<h2 style="margin:14px 2px 6px">Body</h2><div class="chips">${[['weight', 'Weight', unit()], ['bf', 'Body fat', '%'], ['waist', 'Waist', lenUnit()]].filter(([k]) => r[k]).map(([k, l, u]) => `<span class="chip">${l} ${r[k].start}→${r[k].current}${u === '%' ? '%' : ' ' + u} (${signedN(r[k].change)})</span>`).join('')}</div>` : ''}
       ${r.kcal != null || r.sleep != null ? `<h2 style="margin:14px 2px 6px">Food & recovery</h2><div class="chips">${r.kcal != null ? `<span class="chip">${r.kcal.toLocaleString()} kcal/day</span><span class="chip">${r.protein} g protein/day</span><span class="chip">${r.foodDays} days logged</span>` : ''}${r.sleep != null ? `<span class="chip">${r.sleep} h sleep</span>` : ''}${r.fatigue != null ? `<span class="chip">Energy: ${FATIGUE[Math.round(r.fatigue)]}</span>` : ''}</div>` : ''}
     </section>
-    <button class="btn block" data-a="report-export" style="margin-top:0">Export this report</button>
-    <h2>Consistency</h2><section class="card"><div class="row" style="gap:16px;align-items:center">${ring(score, 100, score >= 80 ? '#69db7c' : score >= 50 ? ACC() : '#ff8787', score + '%', 'score', 92)}
-      <div class="grow sm">How often you hit your goal of <b>${S.settings.weeklyGoal}</b> workouts a week over the last 8 finished weeks (a week with ${Math.ceil(S.settings.weeklyGoal / 2)} of ${S.settings.weeklyGoal} counts as half).<div class="muted xs" style="margin-top:6px">Current streak: <b>${streak}</b> week${streak === 1 ? '' : 's'} in a row with a workout.</div></div></div></section>
+    <h2>Consistency</h2><section class="card"><div class="row between" style="align-items:flex-end"><div><div class="cons-n">${score}%</div><div class="muted xs" style="margin-top:4px">score · last 8 finished weeks</div></div><span class="chip" style="font-size:12.5px;padding:7px 12px">${streak}-week streak</span></div>
+      <div class="weeks8" role="img" aria-label="Last 8 finished weeks, oldest first">${weekFills(now).map(v => `<i class="${v >= 1 ? 'full' : v > 0 ? 'part' : ''}"></i>`).join('')}</div>
+      <div class="muted sm" style="margin-top:12px">How often you hit your goal of <b style="color:var(--text)">${S.settings.weeklyGoal} workouts a week</b>. A week with ${Math.ceil(S.settings.weeklyGoal / 2)} of ${S.settings.weeklyGoal} counts as half.</div></section>
     <h2>Training calendar</h2>${calendar(ui.rPeriod === 'month' ? ui.rOffset : 0, now)}
     <h2>Personal records</h2>${recordsList()}`;
 }

@@ -17,12 +17,12 @@ function viewRecovery() {
       <button class="icon" data-a="rc-day" data-d="1" aria-label="Next day" ${key >= todayKey() ? 'disabled style="opacity:.3"' : ''}><span style="display:inline-block;transform:rotate(180deg)">${IC.back}</span></button></div>
     <div class="group">
       ${srow('moon', 'Sleep', 'Hours last night', step('sleep', d.sleep, 0.5, 14))}
-      <div class="srow" style="display:block"><div class="t">Sleep quality</div><div class="chips" style="margin-top:6px">${QUALITY.slice(1).map((l, i) => `<button class="chip btnchip ${+d.sleepQ === i + 1 ? 'on' : ''}" data-a="rc-set" data-k="sleepQ" data-v="${i + 1}">${l}</button>`).join('')}</div></div>
+      <div class="srow" style="display:block"><div class="t">Sleep quality</div><div class="segbar pick" style="margin:8px 0 0">${QUALITY.slice(1).map((l, i) => `<button class="${+d.sleepQ === i + 1 ? 'on' : ''}" aria-pressed="${+d.sleepQ === i + 1}" data-a="rc-set" data-k="sleepQ" data-v="${i + 1}">${l}</button>`).join('')}</div></div>
       <div class="srow" style="display:block"><div class="t">Energy / fatigue</div><div class="chips" style="margin-top:6px">${FATIGUE.slice(1).map((l, i) => `<button class="chip btnchip ${+d.fatigue === i + 1 ? 'on' : ''}" data-a="rc-set" data-k="fatigue" data-v="${i + 1}">${l}</button>`).join('')}</div></div>
       <div class="srow" style="display:block"><div class="t">Soreness</div>${SORE_GROUPS.map(g => { const cur = d.sore?.[g] || 0; return `<div class="row between" style="margin-top:2px"><span class="sm">${g}</span><div class="row" style="gap:10px"><div class="sore">${SORE.map((l, i) => `<button class="${i <= cur ? 'on lv' + cur : ''}" data-a="rc-sore" data-g="${g}" data-v="${i}" aria-label="${g} soreness: ${l}" aria-pressed="${i === cur}"><i></i></button>`).join('')}</div><span class="sm" style="width:38px;text-align:right;font-weight:600">${SORE[cur]}</span></div></div>`; }).join('')}</div>
       ${srow('heart', 'Resting heart rate', d.rhrSrc === 'health' ? 'From Apple Health' : 'bpm, optional', `<input class="mini-in" inputmode="numeric" value="${esc(d.rhr ?? '')}" data-c="rc" data-k="rhr" placeholder="—">`)}
       ${srow('wave', 'HRV', d.hrvSrc === 'health' ? 'From Apple Health' : 'ms, optional', `<input class="mini-in" inputmode="numeric" value="${esc(d.hrv ?? '')}" data-c="rc" data-k="hrv" placeholder="—">`)}
-      ${srow('rest', 'Rest day', 'Planned day off', `<button class="seg-t ${d.rest ? 'on' : ''}" data-a="rc-rest">${d.rest ? 'Yes' : 'No'}</button>`)}
+      ${srow('rest', 'Rest day', 'Planned day off', `<button class="switch ${d.rest ? 'on' : ''}" role="switch" aria-checked="${!!d.rest}" aria-label="Rest day" data-a="rc-rest"><span><i></i></span></button>`)}
       <div class="srow" style="display:block"><textarea class="in" rows="2" placeholder="Notes (stress, illness, travel…)" data-c="rc" data-k="notes">${esc(d.notes || '')}</textarea></div>
     </div>
     ${recoveryWeek(now)}

@@ -4,16 +4,16 @@ document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-a]'); if (!b) return;
   const a = b.dataset.a, i = +b.dataset.i, j = +b.dataset.j, id = b.dataset.id, A = S.active;
   switch (a) {
-    case 'tab': tab = b.dataset.t; editPlanId = null; if (tab === 'profile') ui.profile = ''; if (tab === 'nutrition') ui.day = ''; haptic(); render(); scrollTo(0, 0); break;
+    case 'tab': tab = b.dataset.t; editPlanId = null; ui.wkHome = false; ui.plansView = ''; if (tab === 'profile') ui.profile = ''; if (tab === 'nutrition') ui.day = ''; haptic(); render(); scrollTo(0, 0); break;
     case 'go-settings': if (tab !== 'settings') backTab = tab; tab = 'settings'; render(); scrollTo(0, 0); break;
     case 'back': tab = backTab; render(); scrollTo(0, 0); break;
     case 'unit': S.settings.unit = b.dataset.v; save(); render(); break;
     case 'theme': S.settings.theme = b.dataset.v; save(); haptic(); render(); break;
-    case 'resume': tab = 'workout'; editPlanId = null; render(); scrollTo(0, 0); break;
+    case 'resume': ui.wkHome = false; tab = 'workout'; editPlanId = null; render(); scrollTo(0, 0); break;
     case 'rest-step': S.settings.rest = Math.min(600, Math.max(15, (+S.settings.rest || 90) + +b.dataset.d)); save(); render(); break;
     case 'close': closeSheet(); break;
     case 'ask-ok': { const f = askFn; askFn = null; closeSheet(); f && f(); break; }
-    case 'start': startWorkout(id); break;
+    case 'start': ui.wkHome = false; startWorkout(id); break;
     case 'finish': finishWorkout(); break;
     case 'discard': ask('Discard this workout? Nothing will be saved.', 'Discard', () => { S.active = null; stopRest(); keepAwake(false); save(); render(); }); break;
     case 'set-add': { const e = A.exercises[i], last = e.sets[e.sets.length - 1]; e.sets.push({ w: last ? last.w : '', r: last ? last.r : '', done: false }); save(); render(); break; }

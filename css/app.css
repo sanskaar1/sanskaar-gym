@@ -403,3 +403,23 @@ nav.tabs button.on{color:var(--accInk)}
 [data-theme="dark"] .sore .on.lv1 i{background:#8A7426}[data-theme="dark"] .sore .on.lv3 i{background:#FFF0B8}
 .li .ic{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--accSoft);color:var(--accText);flex:0 0 auto}
 #fres .li .grow>br{display:none}#fres .li .grow>span{display:block}#fres .li .grow>.muted{margin-top:3px}
+/* v10.2: the rest of the canvas — profile picture, quick-add foods, water steps, consistency strip, switch */
+.gear.hidden{display:none}
+.avatar{width:56px;height:56px;border-radius:20px;background:var(--acc);color:var(--accInk);display:grid;place-items:center;font-size:24px;font-weight:700;overflow:hidden;flex:0 0 auto;cursor:pointer}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.card .icon.solid,.icon.solid{background:var(--solid);color:var(--onSolid)}
+.water .ic{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--accSoft);color:var(--accText);flex:0 0 auto}
+.glasses{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:12px}.glasses i{height:22px;border-radius:8px;background:var(--track)}.glasses i.on{background:var(--acc)}
+.frow{gap:8px}.fpick{flex:1 1 auto;min-width:0;text-align:left}.fpick>span{display:block}.fpick>.muted{margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fq{min-width:18px;text-align:center;font-variant-numeric:tabular-nums}
+#fbasket{position:sticky;bottom:0;z-index:2}
+.fbar{display:flex;align-items:center;gap:10px;height:58px;border-radius:29px;padding:0 7px 0 18px;margin-top:10px;background:var(--card2);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.fbar .btn.sm{height:44px;border-radius:22px;padding:0 16px}
+.report>.tiles:first-child .tile:first-child{background:var(--acc);color:var(--accInk)}.report>.tiles:first-child .tile:first-child .l{color:var(--accInk)}
+.cons-n{font-size:40px;font-weight:600;letter-spacing:-.04em;line-height:1}
+.weeks8{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:14px}.weeks8 i{height:40px;border-radius:12px;background:var(--track)}
+.weeks8 i.full{background:var(--acc)}.weeks8 i.part{background:#F9E39A}[data-theme="dark"] .weeks8 i.part{background:#8A7426}
+.segbar.pick{background:var(--card2)}.segbar.pick button{padding:11px 2px}.segbar.pick button.on{background:var(--solid);color:var(--onSolid)}
+.switch{width:56px;height:44px;padding:0;display:flex;align-items:center;flex:0 0 auto}.switch span{display:flex;flex:0 0 56px;width:56px;height:32px;padding:3px;border-radius:16px;background:var(--faint);transition:background .2s}
+.switch i{width:26px;height:26px;border-radius:50%;background:#fff;transition:transform .2s}.switch.on span{background:#B8860B}.switch.on i{transform:translateX(24px)}
+[data-theme="dark"] .switch.on span{background:#C79A12}

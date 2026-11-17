@@ -26,6 +26,8 @@ const TYPICAL_FOODS = [
   ['Broccoli', 34, 2.8, 7, 0.4, 90, 'cup'], ['Spinach', 23, 2.9, 3.6, 0.4, 30, 'cup'], ['Mixed vegetable sabzi', 90, 2.5, 9, 5, 150, 'katori'],
 ].map(([name, kcal, p, c, f, serving, sname]) => ({ id: 't-' + name.toLowerCase().replace(/[^a-z]+/g, '-'), name, kcal, p, c, f, serving, sname, src: 'typical' }));
 const MEALS = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+const IC_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const IC_DROP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3 3.6 5.5 6.6 5.5 10a5.5 5.5 0 0 1-11 0c0-3.4 2.500-6.4 5.5-10z"/></svg>';
 const dayRec = (key, make) => { let d = S.days.find(x => x.id === key); if (!d && make) { d = { id: key }; S.days.push(d); } return d; };
 const todayKey = () => ymd(Date.now());
 
@@ -40,11 +42,11 @@ function viewNutrition() {
         <div class="grow">${[['p', 'Protein'], ['c', 'Carbs'], ['f', 'Fat']].map(([k, l]) => `<div class="mrow2"><div class="row between xs"><span>${l}</span><span><b>${tot[k]}</b>${t[k] ? ` / ${t[k]}` : ''} g</span></div>${bar(tot[k], +t[k], PALETTE[k])}</div>`).join('')}</div></div>
       ${!t.kcal ? `<button class="btn sm ghost" data-a="targets" style="margin-top:10px">Set daily targets</button>` : `<div class="row between xs muted" style="margin-top:8px"><span>${t.kcal - tot.kcal >= 0 ? `${(t.kcal - tot.kcal).toLocaleString()} kcal left` : `${(tot.kcal - t.kcal).toLocaleString()} kcal over`}</span><button class="linkbtn" data-a="targets">Targets</button></div>`}
     </section>
-    <section class="card water"><div class="row between"><div><div class="t">💧 Water</div><div class="muted xs">${(water / 1000).toFixed(2)} of ${(wt / 1000).toFixed(1)} L</div></div>
-      <div class="row gap"><button class="btn sm" data-a="water" data-v="-250">−</button><button class="btn sm" data-a="water" data-v="250">+250</button><button class="btn sm acc" data-a="water" data-v="500">+500</button></div></div>${bar(water, wt, PALETTE.water)}</section>
+    <section class="card water"><div class="row between"><div class="row" style="gap:10px"><span class="ic">${IC_DROP}</span><div><div class="t">Water</div><div class="muted xs">${(water / 1000).toFixed(2)} of ${(wt / 1000).toFixed(1)} L</div></div></div>
+      <div class="row gap"><button class="btn sm" data-a="water" data-v="-250">−</button><button class="btn sm" data-a="water" data-v="250">+250</button><button class="btn sm acc" data-a="water" data-v="500">+500</button></div></div><div class="glasses" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i class="${water >= (i + 1) * wt / 10 ? 'on' : ''}"></i>`).join('')}</div></section>
     ${MEALS.map(m => { const list = entries.filter(e => e.meal === m), mt = dayTotals(list); return `<section class="card meal">
       <div class="row between"><div><div class="t">${m}</div><div class="muted xs">${list.length ? `${mt.kcal} kcal · P ${mt.p} · C ${mt.c} · F ${mt.f}` : 'Nothing yet'}</div></div>
-        <div class="row gap">${list.length ? `<button class="icon sm" data-a="meal-save" data-v="${m}" aria-label="Save as meal">${IC.star}</button>` : ''}<button class="btn sm acc" data-a="food-add" data-v="${m}">+ Add</button></div></div>
+        <div class="row gap">${list.length ? `<button class="icon sm" data-a="meal-save" data-v="${m}" aria-label="Save as meal">${IC.star}</button>` : ''}<button class="icon solid" data-a="food-add" data-v="${m}" aria-label="Add food to ${m}">${IC_PLUS}</button></div></div>
       ${list.map(e => `<div class="fe"><div class="grow" style="min-width:0"><div class="ellip sm">${esc(e.name)}</div><div class="muted xs">${esc(e.amount || '')} · P ${e.p} · C ${e.c} · F ${e.f} ${pill(SOURCE[e.src]?.[0] || '', SOURCE[e.src]?.[1] || '')}</div></div><b class="sm">${e.kcal}</b><button class="icon sm" data-a="food-del" data-id="${e.id}" aria-label="Remove">${IC.x}</button></div>`).join('')}
     </section>`; }).join('')}
     ${weekNutrition(key)}`;
@@ -79,11 +81,11 @@ const latestWeight = () => { const s = bodySeries(S.body, 'weight'); return s.le
 /* adding food */
 let foodCtx = null;
 ACT['food-add'] = b => {
-  foodCtx = { meal: b.dataset.v, q: '', off: null };
+  foodCtx = { meal: b.dataset.v, q: '', off: null, basket: {} };
   openSheet(`<div class="sheet-h"><h3>Add to ${esc(foodCtx.meal)}</h3><button class="icon" data-a="close">${IC.x}</button></div>
     <input class="in" id="fq" placeholder="Search foods (e.g. paneer, oats, eggs)" data-c="fq" data-live="1" autocomplete="off">
     <div class="row gap" style="margin-top:8px;flex-wrap:wrap"><button class="btn sm" data-a="off-search">Search packaged foods</button><button class="btn sm" data-a="barcode">Barcode number</button><button class="btn sm" data-a="food-custom">+ My food</button>${mediaReady() && mediaState.ai ? `<button class="btn sm" data-a="food-ai">✨ Describe a meal</button>` : ''}</div>
-    <div id="fres" style="margin-top:10px">${foodResults()}</div>`);
+    <div id="fres" style="margin-top:10px">${foodResults()}</div><div id="fbasket"></div>`);
 };
 function foodResults() {
   const q = (foodCtx.q || '').toLowerCase().trim();
@@ -99,10 +101,31 @@ function foodResults() {
   const repeat = prev.length ? `<button class="li pick" data-a="meal-repeat"><span class="ic">${IC.reset}</span><span class="grow"><span class="t">Repeat ${(ui.day || todayKey()) === todayKey() ? "yesterday's" : "the day before's"} ${esc(foodCtx.meal.toLowerCase())}</span><br><span class="muted xs">${prev.length} item${prev.length === 1 ? '' : 's'} · ${dayTotals(prev).kcal} kcal</span></span><span class="chip">Add</span></button>` : '';
   const html = repeat + groups.filter(([, l]) => l.length).map(([t, l]) => `<div class="xs muted gh2">${t}</div>${l.slice(0, 25).map((f, i) => f.isMeal
     ? `<button class="li pick" data-a="meal-use" data-id="${f.id}"><span class="grow"><span class="t">${esc(f.name)}</span><br><span class="muted xs">${f.items.length} items · ${dayTotals(f.items).kcal} kcal</span></span><span class="chip">Add</span></button>`
-    : `<button class="li pick" data-a="food-pick" data-g="${t}" data-i="${i}"><span class="grow" style="min-width:0"><span class="t ellip">${esc(f.name)}</span><br><span class="muted xs">${line(f)} ${pill(SOURCE[f.src]?.[0] || '', SOURCE[f.src]?.[1] || '')}</span></span>${IC.chev}</button>`).join('')}`).join('');
+    : `<div class="li frow"><button class="fpick" data-a="food-pick" data-g="${t}" data-i="${i}"><span class="t ellip">${esc(f.name)}</span><span class="muted xs">${line(f)} ${pill(SOURCE[f.src]?.[0] || '', SOURCE[f.src]?.[1] || '')}</span></button>
+        ${inBasket(f) ? `<button class="icon" data-a="fb-step" data-g="${t}" data-i="${i}" data-d="-1" aria-label="One less ${esc(f.name)}">−</button><b class="fq">${inBasket(f)}</b>` : ''}<button class="icon ${inBasket(f) ? 'on' : ''}" data-a="fb-step" data-g="${t}" data-i="${i}" data-d="1" aria-label="Add one ${esc(f.name)}">${IC_PLUS}</button></div>`).join('')}`).join('');
   foodCtx.groups = Object.fromEntries(groups.map(([t, l]) => [t, l]));
   return html || `<div class="empty">No match. Try "Search packaged foods", or add it as your own food.</div>`;
 }
+// Quick add: tap + on several foods (one usual portion each, or 100 g), then add them all at once. Tapping the name still opens the exact amount.
+const inBasket = f => foodCtx.basket[f.name]?.n || 0;
+const basketAmount = ({ f, n }) => { const serv = +f.serving > 0, q = serv ? n : n * 100, u = serv ? 'serving' : 'g'; return { q, u, a: foodAmount(f, q, u) }; };
+function basketBar() {
+  const items = Object.values(foodCtx.basket); if (!items.length) return '';
+  const count = items.reduce((t, x) => t + x.n, 0), kcal = items.reduce((t, x) => t + basketAmount(x).a.kcal, 0);
+  return `<div class="fbar"><span class="grow"><b>${count} item${count === 1 ? '' : 's'}</b> · ${kcal} kcal</span><button class="btn sm acc" data-a="fb-log">Add to ${esc(foodCtx.meal)}</button></div>`;
+}
+ACT['fb-step'] = b => {
+  const f = foodCtx.groups[b.dataset.g][+b.dataset.i], n = Math.max(0, inBasket(f) + +b.dataset.d);
+  if (n) foodCtx.basket[f.name] = { f, n }; else delete foodCtx.basket[f.name];
+  $('#fres').innerHTML = foodResults(); $('#fbasket').innerHTML = basketBar(); haptic();
+};
+ACT['fb-log'] = () => {
+  const items = Object.values(foodCtx.basket); if (!items.length) return;
+  items.forEach(x => { const { f } = x, { q, u, a } = basketAmount(x);
+    S.food.push({ id: uid(), date: ui.day || todayKey(), meal: foodCtx.meal, name: f.name, amount: u === 'serving' ? `${q} ${f.sname || 'serving'}` : `${q} g`, qty: q, unit: u, kcal: a.kcal, p: a.p, c: a.c, f: a.f, src: f.src, at: Date.now(),
+      per: { kcal: f.kcal, p: f.p, c: f.c, f: f.f, serving: f.serving || '', sname: f.sname || '' } }); });
+  const meal = foodCtx.meal; save(); closeSheet(); render(); haptic(); toast(`${items.length} food${items.length === 1 ? '' : 's'} added to ${meal}`);
+};
 // What was logged for this meal on the day before the one being viewed
 const prevMeal = () => { const k = ymd(fromKey(ui.day || todayKey()) - DAY); return S.food.filter(e => e.date === k && e.meal === foodCtx.meal); };
 ACT['meal-repeat'] = () => {

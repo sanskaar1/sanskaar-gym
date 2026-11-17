@@ -24,6 +24,10 @@ function viewProgress() {
   if (!used.includes(progEx)) progEx = used[0];
   const hist = exerciseHistory(S.workouts, progEx), rec = personalRecords(S.workouts)[progEx];
   return `${viewReports()}
+    <h2>All time</h2><div class="tiles" style="margin-top:0">
+      <div class="tile"><div class="v">${ws.length}</div><div class="l">Workouts</div></div>
+      <div class="tile"><div class="v">${fmtN(total)}</div><div class="l">Total ${unit()} lifted</div></div>
+      <div class="tile"><div class="v">${Math.round(avgMin)}<span class="sm muted">m</span></div><div class="l">Avg duration</div></div></div>
     <h2>Weekly volume</h2><div class="card">${barChart2(labels, [{ data: vols, backgroundColor: vols.map((_, i) => i === vols.length - 1 ? ACC() : cssVar('--track')) }], { fmt: v => fmtN(v) + ' ' + unit() })}<div class="muted xs">Weight × reps of working sets (warm-ups excluded).</div></div>
     <h2>Strength — estimated 1-rep max</h2><div class="card">
       <select class="in" data-prog-ex>${used.map(id => `<option value="${id}" ${id === progEx ? 'selected' : ''}>${esc(lib(id).name)}</option>`).join('')}</select>
@@ -43,7 +47,10 @@ function viewProfile() {
   if (ui.profile === 'goals') return viewGoals();
   const awards = Object.keys(S.settings.awards || {}).length, streak = weekStreak(S.workouts, Date.now());
   const lastW = bodySeries(S.body, 'weight'), w = lastW.length ? lastW[lastW.length - 1].y : null;
-  return `<section class="card hero profile-hero"><div class="big">Your profile</div>
+  const pic = avatarURL();
+  return `<section class="card hero profile-hero"><div class="row" style="gap:14px">
+      <label class="avatar" aria-label="${pic ? 'Change profile picture' : 'Add a profile picture'}">${pic ? `<img src="${pic}" alt="">` : 'S'}<input type="file" accept="image/*" data-c="avatar" hidden></label>
+      <div><div class="big">Your profile</div><div class="muted sm">${pic ? `Tap the picture to change it · <button data-a="avatar-rm" style="text-decoration:underline">remove</button>` : 'Tap the square to add your picture'}</div></div></div>
       <div class="tiles" style="margin-top:12px"><div class="tile"><div class="v">${S.workouts.length}</div><div class="l">Workouts</div></div><div class="tile"><div class="v">${streak}</div><div class="l">Week streak</div></div><div class="tile"><div class="v">${w != null ? w : '—'}<small> ${w != null ? unit() : ''}</small></div><div class="l">Weight</div></div></div></section>
     <div class="group">
       ${srow('camera', 'Transformation photos', `${S.photos.length} photo${S.photos.length === 1 ? '' : 's'} · before/after`, IC.chev, 'go-photos')}
@@ -51,6 +58,14 @@ function viewProfile() {
     </div>
     <div class="group">${srow('settings', 'Settings', 'Units, rest timer, equipment, Sheet, backups', IC.chev, 'go-settings')}</div>`;
 }
+// Profile picture: kept on this phone only (it is not sent to the Sheet)
+const AVATAR_KEY = 'sgym.avatar';
+const avatarURL = () => { try { return localStorage.getItem(AVATAR_KEY) || ''; } catch (e) { return ''; } };
+CHG['avatar'] = async t => {
+  const f = t.files[0]; if (!f) return;
+  try { localStorage.setItem(AVATAR_KEY, await shrinkImage(f, 320, 0.82, true)); render(); toast('Profile picture updated'); } catch (e) { toast("Couldn't use that photo"); }
+};
+ACT['avatar-rm'] = () => { try { localStorage.removeItem(AVATAR_KEY); } catch (e) {} render(); };
 ACT['go-goals'] = () => { tab = 'profile'; ui.profile = 'goals'; render(); scrollTo(0, 0); };
 ACT['go-recovery'] = () => { tab = 'analytics'; ui.seg = 'recovery'; render(); scrollTo(0, 0); };
 ACT['go-reports'] = () => { tab = 'analytics'; ui.seg = 'reports'; render(); scrollTo(0, 0); };
