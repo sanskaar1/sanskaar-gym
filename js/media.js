@@ -56,4 +56,4 @@ ACT['ai-key-del'] = async () => {
   if (!confirm('Remove the AI key? The AI coach turns off; everything else keeps working.')) return;
   try { await media('setAiKey', { aiKey: '' }); mediaState.ai = false; mediaState.provider = ''; toast('AI key removed'); render(); } catch (e) { toast(e.message); }
 };
-const aiProviderName = () => ({ gemini: 'Gemini 3.8 Flash (free)', groq: 'Groq gpt-oss-120b (free)', anthropic: 'Anthropic Claude Opus 5.5' })[mediaState.provider] || 'on';
+const aiProviderName = () => ({ gemini: 'Gemini Flash-Lite (free)', groq: 'Groq gpt-oss-120b (free)', anthropic: 'Anthropic Claude Opus 5.5' })[mediaState.provider] || 'on';
