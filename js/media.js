@@ -5,7 +5,7 @@
  */
 const MEDIA_API = 'https://script.google.com/macros/s/AKfycbxY1tDOFmky75Ia7RtWqUcTZ8XwY29w7D5ZAsBazT0Nd6JkkGZKztIi6nBgGs9VPS95/exec';
 const MEDIA_EDIT = 'https://script.google.com/d/1mWjNk_xdrM2JedLvEpCMX2KeLfY0i2HJrc1IdWAoo34_tSAWvWumP3ai/edit';
-const mediaState = { status: 'unknown', ai: false, checked: 0 }; // unknown | needs-approval | ready | offline | no-key
+const mediaState = { status: 'unknown', ai: false, provider: '', checked: 0 }; // unknown | needs-approval | ready | offline | no-key
 const mediaReady = () => mediaState.status === 'ready';
 
 async function media(action, data) {
@@ -19,7 +19,7 @@ async function mediaCheck(force) {
   if (!connected()) { mediaState.status = 'no-key'; return mediaState; }
   if (!force && Date.now() - mediaState.checked < 60000) return mediaState;
   mediaState.checked = Date.now();
-  try { const j = await media('ping'); mediaState.status = 'ready'; mediaState.ai = !!j.ai; }
+  try { const j = await media('ping'); mediaState.status = 'ready'; mediaState.ai = !!j.ai; mediaState.provider = j.provider || ''; }
   catch (e) { if (mediaState.status !== 'needs-approval') mediaState.status = navigator.onLine === false ? 'offline' : 'needs-approval'; }
   return mediaState;
 }
@@ -37,16 +37,23 @@ async function mediaBackfill() {
 
 function mediaCard() {
   const st = mediaState.status;
-  const status = st === 'ready' ? `Approved · AI coach ${mediaState.ai ? 'on' : 'needs your Anthropic key'}` : st === 'needs-approval' ? 'Needs a one-time Google approval' : st === 'no-key' ? 'Connect your Sheet first' : st === 'offline' ? 'Offline' : 'Checking…';
+  const status = st === 'ready' ? `Approved · AI coach ${mediaState.ai ? 'on · ' + aiProviderName() : 'needs an API key'}` : st === 'needs-approval' ? 'Needs a one-time Google approval' : st === 'no-key' ? 'Connect your Sheet first' : st === 'offline' ? 'Offline' : 'Checking…';
   return `<div class="gh">Media add-on</div><div class="group">
     ${srow('cloud', 'Drive photos, YouTube search, AI', status, st === 'ready' ? `<span class="pill2 good">On</span>` : `<button class="btn sm" data-a="media-check">Check</button>`)}
     ${st === 'needs-approval' ? `<div class="srow" style="display:block"><div class="s" style="line-height:1.5">Approve once on a computer or phone signed in to your Google account:<br>1. Open the <a target="_blank" rel="noopener" style="color:var(--accText)" href="${MEDIA_EDIT}">Media script ↗</a><br>2. Choose <b>doGet</b> at the top and press <b>Run</b><br>3. <b>Review permissions</b> → your account → <b>Advanced</b> → <b>Go to Sanskaar GYM — Media</b> → <b>Allow</b><br>4. Come back and tap <b>Check</b>.</div></div>` : ''}
-    ${st === 'ready' ? `<div class="srow" style="flex-wrap:wrap"><span class="ic">${IC.spark}</span><div class="grow"><div class="t">AI coach key</div><div class="s">Your own Anthropic API key, stored only in your private Google script</div></div>
-      <div class="row gap" style="width:100%"><input class="in" id="aikey" type="password" autocomplete="off" placeholder="${mediaState.ai ? 'Saved — paste a new one to replace' : 'sk-ant-…'}"><button class="btn acc" data-a="ai-key">Save</button></div></div>` : ''}
+    ${st === 'ready' ? `<div class="srow" style="flex-wrap:wrap"><span class="ic">${IC.spark}</span><div class="grow"><div class="t">AI coach key</div><div class="s">Free: a Gemini key from <a target="_blank" rel="noopener" style="color:var(--accText)" href="https://aistudio.google.com/apikey">Google AI Studio ↗</a> (starts AIza…). Groq (gsk_…) and Anthropic (sk-ant-…) keys work too. Stored only in your private Google script.</div></div>
+      <div class="row gap" style="width:100%"><input class="in" id="aikey" type="password" autocomplete="off" placeholder="${mediaState.ai ? 'Saved — paste a new one to replace' : 'Paste key (AIza…)'}"><button class="btn acc" data-a="ai-key">Save</button></div>
+      ${mediaState.provider === 'gemini' || mediaState.provider === 'groq' ? `<div class="s" style="width:100%;line-height:1.45">Free tier: daily limits apply.${mediaState.provider === 'gemini' ? ' Google may use free-tier questions (with the training summary sent) to improve its products.' : ''}</div>` : ''}
+      ${mediaState.ai ? `<button class="btn sm ghost" data-a="ai-key-del">Remove key (turn AI off)</button>` : ''}</div>` : ''}
   </div>`;
 }
 ACT['media-check'] = async () => { toast('Checking…'); await mediaCheck(true); render(); toast(mediaReady() ? 'Media add-on is on ✓' : 'Not approved yet'); if (mediaReady()) mediaBackfill(); };
 ACT['ai-key'] = async () => {
-  const k = $('#aikey').value.trim(); if (!k) return toast('Paste your Anthropic API key');
-  try { const j = await media('setAiKey', { aiKey: k }); mediaState.ai = j.ai; toast('AI key saved ✓'); render(); } catch (e) { toast(e.message); }
+  const k = $('#aikey').value.trim(); if (!k) return toast('Paste your API key');
+  try { const j = await media('setAiKey', { aiKey: k }); mediaState.ai = j.ai; mediaState.provider = j.provider || ''; toast('AI key saved ✓ · ' + aiProviderName()); render(); } catch (e) { toast(e.message); }
 };
+ACT['ai-key-del'] = async () => {
+  if (!confirm('Remove the AI key? The AI coach turns off; everything else keeps working.')) return;
+  try { await media('setAiKey', { aiKey: '' }); mediaState.ai = false; mediaState.provider = ''; toast('AI key removed'); render(); } catch (e) { toast(e.message); }
+};
+const aiProviderName = () => ({ gemini: 'Gemini 3.8 Flash (free)', groq: 'Groq gpt-oss-120b (free)', anthropic: 'Anthropic Claude Opus 5.5' })[mediaState.provider] || 'on';

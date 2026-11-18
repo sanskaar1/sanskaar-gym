@@ -121,12 +121,12 @@ ACT['gen-plan'] = () => {
   save(); render(); toast('Suggested — accept it above to add the plan');
 };
 
-/* AI chat (Media add-on + your Anthropic key). Answers use a summary of your own data. */
+/* AI chat (Media add-on + a Gemini, Groq or Anthropic key). Answers use a summary of your own data. */
 const aiChat = [];
 function aiBox() {
   const st = mediaState.status;
   return `<h2>Ask your coach</h2><div class="card">
-    ${st !== 'ready' || !mediaState.ai ? `<div class="muted sm">AI answers need the Media add-on and your own Anthropic API key (Profile → Settings → Media add-on). Everything above works without it.</div>`
+    ${st !== 'ready' || !mediaState.ai ? `<div class="muted sm">AI answers need the Media add-on and an AI key — a free Gemini key works (Profile → Settings → Media add-on). Everything above works without it.</div>`
       : `${aiChat.map(m => `<div class="bubble ${m.role}">${m.role === 'assistant' ? md(m.content) : esc(m.content)}</div>`).join('')}
         <div id="aiWait"></div>
         <div class="row gap" style="margin-top:8px"><input class="in" id="aiq" placeholder="e.g. Why has my bench stalled?" autocomplete="off"><button class="btn acc" data-a="ai-ask">Ask</button></div>
