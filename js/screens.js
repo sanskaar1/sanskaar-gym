@@ -15,7 +15,8 @@ function viewProgress() {
   const ws = sorted();
   if (!ws.length) return `<div class="card empty-state"><div class="prev-bars" aria-hidden="true">${[38, 62, 50, 84, 70, 100, 90].map((h, i) => `<i class="${i === 5 ? 'hi' : ''}" style="height:${h}%"></i>`).join('')}</div>
     <div class="es-t">Your progress shows up here</div><div class="es-s">Finish your first workout and this fills in on its own: weekly volume, consistency, your training calendar and personal records.</div>
-    <button class="btn acc lg block" data-a="tab" data-t="workout" style="margin-top:18px">Start a workout</button></div>`;
+    <button class="btn acc lg block" data-a="tab" data-t="workout" style="margin-top:18px">Start a workout</button></div>
+    <h2>More</h2><div class="group">${srow('spark', 'Coach', 'Ask your AI coach anything about training or food', IC.chev, 'go-coach')}</div>`;
   const now = Date.now(), wk = startOfWeek(now);
   const total = ws.reduce((a, w) => a + wVolume(w), 0), avgMin = ws.reduce((a, w) => a + (w.end - w.start), 0) / ws.length / 6e4;
   const labels = [], vols = [];

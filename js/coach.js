@@ -70,7 +70,7 @@ function refreshSuggestions() {
 
 function viewCoach() {
   const now = Date.now();
-  if (!S.workouts.length) return emptyCard('Your coach needs data', 'Log a few workouts and the coach will spot progress, stalls and gaps — all from your own numbers.');
+  if (!S.workouts.length) return emptyCard('Your coach needs data', 'Log a few workouts and the coach will spot progress, stalls and gaps — all from your own numbers. You can already ask the AI coach below.') + aiBox(); // AI chat works before the first workout
   refreshSuggestions();
   const ins = coachInsights(now), pending = S.suggestions.filter(s => s.status === 'pending');
   const wk = startOfWeek(now), thisW = S.workouts.filter(w => w.start >= wk), lastW = S.workouts.filter(w => w.start >= wk - WEEK && w.start < wk);
